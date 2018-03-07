@@ -13,7 +13,7 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
             })
         },
         handler: (argv) => {
-            app.locationWeather(argv.location)
+            app.locationWeather_woeid(argv.location)
         }
     })
     .command({
@@ -26,7 +26,7 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
             })
         },
         handler: (argv) => {
-            app.lattLongWeather(argv.lattlong)
+            app.lattLongWeather_woeid(argv.lattlong)
         }
     })
     .help('help')
