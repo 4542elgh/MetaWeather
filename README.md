@@ -23,6 +23,6 @@ Based on MetaWeather api: [https://www.metaweather.com/api/](https://www.metawea
 * cli search by [location and date]
 * history - return the most recent five searches using inquirer 
    - allow users to see and select which location to view
-* date range of forcasts by location, i.e. given this time frame, return all the forcasts of this location
-* exit command
+* date range of forecasts by location, i.e. given this time frame, return all the forcasts of this location
+* exit command with IO loop
 * cli help menu of the commands
