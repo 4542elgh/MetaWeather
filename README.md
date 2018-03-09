@@ -15,3 +15,11 @@ Based on MetaWeather api: [https://www.metaweather.com/api/](https://www.metawea
    - Select Location based on distance from such latitude and longitude
 * pass in a location and a date
    - To view past, current or maximum 10 days forcast of weather
+* cli-table - table view
+* collect nearby city's forcast by radius
+* alert users if there's storm/dangerous weather
+* cli search by [location and date]
+* history - return the most recent five searches using inquirer - allowusers to see and select which location to view
+* date range of forcasts by location, i.e. given this time frame, return all the forcasts of this location
+* exit command
+* cli help menu of the commands
