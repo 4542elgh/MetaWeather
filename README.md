@@ -21,7 +21,8 @@ Based on MetaWeather api: [https://www.metaweather.com/api/](https://www.metawea
 * collect nearby city's forcast by radius
 * alert users if there's storm/dangerous weather
 * cli search by [location and date]
-* history - return the most recent five searches using inquirer - allowusers to see and select which location to view
+* history - return the most recent five searches using inquirer 
+   - allow users to see and select which location to view
 * date range of forcasts by location, i.e. given this time frame, return all the forcasts of this location
 * exit command
 * cli help menu of the commands
