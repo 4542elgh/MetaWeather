@@ -18,6 +18,11 @@ const lattLongWeather = (latt,long) => {
         .catch(err => console.log(err))
 }
 
+const history = () => {
+    //add method here
+}
+
 module.exports = {
-    locationWeather,lattLongWeather
+    locationWeather,lattLongWeather,
+    history
 }
