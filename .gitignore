@@ -1,5 +1,8 @@
 *
 
+!package.json
+!package-lock.json
+!README.md
 !.gitignore
 !./node_module/
 !./node_module/**
