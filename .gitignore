@@ -4,7 +4,3 @@
 !*.js
 !README.md
 !.gitignore
-!./node_module/
-!./node_module/**
-!./node_modules/
-!./node_modules/**
