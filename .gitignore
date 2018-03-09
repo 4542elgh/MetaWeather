@@ -1,2 +1,7 @@
-node_module
-.idea
+*
+
+!.gitignore
+!./node_module/
+!./node_module/**
+!./node_modules/
+!./node_modules/**
