@@ -17,12 +17,15 @@ Based on MetaWeather api: [https://www.metaweather.com/api/](https://www.metawea
    - To view past, current or maximum 10 days forcast of weather
 
 ### Other Attributes
-* cli-table - table view
-* collect nearby city's forcast by radius
-* alert users if there's storm/dangerous weather
-* cli search by [location and date]
-* history - return the most recent five searches using inquirer 
-   - allow users to see and select which location to view
-* date range of forecasts by location, i.e. given this time frame, return all the forcasts of this location
-* exit command with IO loop
-* cli help menu of the commands
+* table view of the results
+* cli search by location
+    - Return filtered weather condition or return all conditions
+* cli history
+    - Return the most recent five searches
+    - Allow users to select which location to view from the history
+* date range of forecasts by location
+    - Given these dates, return the forecasts of this location
+* cli help
+    - Display a list of the commands with its descriptions
+* cli IO loop
+    - Exit IO loop by selection
