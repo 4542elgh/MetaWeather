@@ -29,5 +29,18 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
             app.lattLongWeather(argv.lattlong)
         }
     })
+    .command({
+        command:'search',
+        desc: 'Search weather by location',
+        builder:(yargs)=>{
+            return yargs.option('l',{
+                alias : 'location',
+                describe: 'Gets weather for specific location'
+            })
+        },
+        handler: (argv) => {
+            app.filterSearch(argv.location)
+        }
+    })
     .help('help')
     .argv
