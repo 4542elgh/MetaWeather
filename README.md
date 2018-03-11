@@ -19,7 +19,7 @@ Based on MetaWeather api: [https://www.metaweather.com/api/](https://www.metawea
 ### Other Attributes
 * table view of the results
 * cli search by location
-    - Return filtered weather condition or return all conditions
+    - Return today's weather conditions with filters
 * cli history
     - Return the most recent five searches
     - Allow users to select which location to view from the history
