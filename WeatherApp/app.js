@@ -58,7 +58,7 @@ const filterForecast = (selections, response) => {
     return filteredForecast
 }
 
-const filterSearch = (location) => {
+const filterSearch = (location, dateRange) => {
 
     let conditions = ['forecast', 'temperature', 'air', 'wind', 'exit']
     let response

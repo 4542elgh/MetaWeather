@@ -30,16 +30,13 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
         }
     })
     .command({
-        command:'search',
+        command:'search <location> [dateRange..]',
         desc: 'Search weather by location',
-        builder:(yargs)=>{
-            return yargs.option('l',{
-                alias : 'location',
-                describe: 'Gets weather for specific location'
-            })
-        },
         handler: (argv) => {
-            app.filterSearch(argv.location)
+            if(argv.dateRange.length == 2) { //if we have a daterange, execute the search
+                app.filterSearch(argv.location, argv.dateRange)
+            }
+            console.log('Unable to execute command. Date range input was invalid')
         }
     })
     .help('help')
