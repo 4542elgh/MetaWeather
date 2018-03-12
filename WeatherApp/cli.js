@@ -37,7 +37,7 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
         builder:(yargs)=>{
             return yargs.option('l',{
                 alias : 'location',
-                describe: 'Gets the weather of the cities within 30 miles of the city you are searching'
+                describe: 'Getting weather for specific location'
             })
         },
         handler: (argv) => {
