@@ -125,7 +125,7 @@ function foreCastForCitiesInRange(cities) {
                     maxTemp: celsiusToFarenheit(result.consolidated_weather[0].max_temp), //temperatures are in celsius
                     windDirection: result.consolidated_weather[0].wind_direction_compass,
                     windSpeed: result.consolidated_weather[0].wind_speed.toPrecision(3),
-                    humidity: result.consolidated_weather[0].humidity,
+                    humidity: result.consolidated_weather[0].humidity + '%',
                     visibility: result.consolidated_weather[0].visibility.toPrecision(4),
                     sunRise: formattingTime(result.sun_rise) + ' AM',
                     sunSet: formattingTime(result.sun_set) + ' PM',
