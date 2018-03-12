@@ -1,6 +1,6 @@
 const
-    weather = require('../MetaWeatherAPI/index')
-inquirer = require('inquirer')
+    weather = require('../MetaWeatherAPI/index'),
+    inquirer = require('inquirer')
 
 const locationWeather = (location) => {
     weather.woeid_by_query(location)
@@ -48,6 +48,7 @@ const selectRange = (result) => {
         foreCastForCitiesInRange(withinRange)
     })
 }
+
 //utility functions
 function milesToMeters(miles) {
     return miles * 1609.34
