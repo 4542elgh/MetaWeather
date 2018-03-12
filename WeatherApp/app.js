@@ -105,8 +105,11 @@ function sortResults(cities) {
     return cities
 
 }
+function checkforSpecificWeather(weatherSearch){
+    
+}
 
-function foreCastForCitiesInRange(cities) {
+function foreCastForCitiesInRange(cities, weatherSearch = '') {
     const citiesInfo = []
     cities.forEach(city => {
         //getting the weather info for each city in range using the WOEID(Where on Earth ID)
@@ -135,9 +138,13 @@ function foreCastForCitiesInRange(cities) {
                 //since our response might shuffle them.
                 if (cities.length === citiesInfo.length) {
                     console.log(sortResults(citiesInfo))
+                //if there we want to add the weather as another constraint here is where we start
+                //implementing it
+                if(weatherSearch  != '')
+                checkforSpecificWeather(weatherSearch)
                 }
 
-
+               
             })
             .catch(err => console.log(err))
     })
@@ -158,11 +165,8 @@ const surroundingCitiesWeather = (location) => {
                 lattLong = result[0].latt_long.split(',')
                 weather.woeid_by_lattlong(lattLong[0], lattLong[1])
                     .then(result => {
-
-                        selectRange(result)
-
-
-
+                        //tansfers control to inquirer to get the range from the user
+                        selectRange(result)  
                     })
                     .catch(err => console.log(err))
 
