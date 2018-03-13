@@ -1,6 +1,7 @@
 const
     weather = require('../MetaWeatherAPI/index')
     inquirer = require('inquirer')
+    Table = require('cli-table2')
 
 const locationWeather = (location) => {
     weather.woeid_by_query(location)
@@ -38,18 +39,18 @@ const filterForecast = (selections, response) => {
                 filteredForecast['temperature'] = temperature
                 break;
             case 'air':
-                let air_cond = {
+                let air = {
                     'humidity': response.humidity.toString() + '%',
                     'air_pressure': Math.round(response.air_pressure).toString() + ' mb'
                 }
-                filteredForecast['air_cond'] = air_cond
+                filteredForecast['air'] = air
                 break;
             case 'wind':
-                let wind_cond = {
+                let wind = {
                     'wind_speed': Math.round(response.wind_speed).toString() + ' mph',
                     'wind_dir': Math.round(response.wind_direction).toString() + '°'
                 }
-                filteredForecast['wind_cond'] = wind_cond
+                filteredForecast['wind'] = wind
                 break;
             case 'exit':
                 return
@@ -58,6 +59,7 @@ const filterForecast = (selections, response) => {
     return filteredForecast
 }
 
+// creates the array of dates
 const getDateRange = (dateRange) => {
     let response = []
     if(dateRange !== null) {
@@ -77,7 +79,60 @@ const getDateRange = (dateRange) => {
     return response  
 }
 
-const forecastAtDay = (response, selections, range=0) => {
+// gets forecasts of location
+const getForecasts = (location, days, selections) => {
+    weather.woeid_by_query(location)
+        
+        .then(result => {
+            let date = new Date()
+            let dateStr = `${date.getMonth() +1}-${date.getDate()}-${date.getFullYear()}`
+
+            //if location not found
+            if (result.length === 0) {
+                console.log(`No data for ${location}`)
+                return
+            }
+
+            //no date range specified
+            if(days.length === 0) {
+                printForecast(weather.get_weather_by_woeid(result[0].woeid), selections, dateStr)
+            }
+
+            days.forEach(day => {
+                printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid, 
+                    day.year, day.month + 1, day.day), selections, dataStr, 1)
+            })
+        })
+}
+
+// formats print
+const formatForecast = (dateStr, filteredForecast) => {
+    let table = new Table({ style: { head: [], boder: [] } })
+    table.push([{
+        colSpan: 2, content: `${dateStr}`
+    }])
+    for (let key in filteredForecast) {
+        if (filteredForecast.hasOwnProperty(key)) {
+            if (typeof filteredForecast[key] === 'object') {
+                for (let key2 in filteredForecast[key]) {
+                    if (filteredForecast[key].hasOwnProperty(key2)) {
+                        table.push([
+                            `${key2}`, `${filteredForecast[key][key2]}`
+                        ])
+                    }
+                }
+            }
+            else {
+                table.push([
+                    `${key}`, `${filteredForecast[key]}`
+                ])
+            }
+        }
+    }
+    return table
+}
+
+const printForecast = (response, selections, dateStr, range=0) => {
     let forecastCopy
 
     response.then(forecasts => {
@@ -89,11 +144,12 @@ const forecastAtDay = (response, selections, range=0) => {
         }
 
         let filteredForecast = filterForecast(selections, forecastCopy)
-        console.log(filteredForecast)
+        console.log(formatForecast(dateStr, filteredForecast).toString())
     })
 }
 
-const getFilters = () => {
+// gives inquirer prompt with all filters
+const getWeatherFilters = () => {
     let conditions = ['forecast', 'temperature', 'air', 'wind', 'exit']
 
     return inquirer.prompt([{
@@ -113,32 +169,11 @@ const getFilters = () => {
     }])
 }
 
-const getForecasts = (location, days, selections) => {
-    weather.woeid_by_query(location)
-        
-        .then(result => {
-            //if location not found
-            if (result.length === 0) {
-                console.log(`No data for ${location}`)
-                return
-            }
-
-            //no date range specified
-            if(days.length === 0) {
-                forecastAtDay(weather.get_weather_by_woeid(result[0].woeid), selections)
-            }
-
-            days.forEach(day => {
-                forecastAtDay(weather.get_weather_by_woeid_at_date(result[0].woeid, 
-                    day.year, day.month + 1, day.day), selections, 1)
-            })
-        })
-}
-
+// wrapper for search
 const filterSearch = (location, dateRange) => {
     let days = getDateRange(dateRange)
 
-    getFilters()
+    getWeatherFilters()
         .then(filters => {
             getForecasts(location, days, filters.conditions)
         })
