@@ -105,8 +105,8 @@ function sortResults(cities) {
     return cities
 
 }
-
-function foreCastForCitiesInRange(cities) {
+//used an empty parameter here in order to reuse this function for another feature
+function foreCastForCitiesInRange(cities, weatherToSearch = []) {
     const citiesInfo = []
     cities.forEach(city => {
         //getting the weather info for each city in range using the WOEID(Where on Earth ID)
@@ -133,8 +133,14 @@ function foreCastForCitiesInRange(cities) {
 
                 //reorganize the list of cities by distance in ascending order, 
                 //since our response might shuffle them.
-                if (cities.length === citiesInfo.length) {
+                if (cities.length === citiesInfo.length ) {
+                   
+                   if(weatherToSearch.length == 0)
                     console.log(sortResults(citiesInfo))
+
+                    else{
+                        searchWeather(sortResults(citiesInfo), weatherToSearch)
+                    }
                 }
 
 
@@ -144,6 +150,94 @@ function foreCastForCitiesInRange(cities) {
 
 }
 const surroundingCitiesWeather = (location) => {
+    let
+        lattLong = []
+
+    weather.woeid_by_query(location)
+        .then(result => {
+            //Validating to make sure that the city entered exists within the MetaWeather API
+            if (result.length === 0)
+                console.log(`Sorry, there are no results in the MetaWeather API for ${location}.`)
+
+            else {
+                lattLong = result[0].latt_long.split(',')
+                weather.woeid_by_lattlong(lattLong[0], lattLong[1])
+                    .then(result => {
+
+                        selectRange(result)
+
+                    })
+                    .catch(err => console.log(err))
+
+            }
+        })
+        .catch(err => console.log(err))
+
+
+}
+//----------------Search by Weather and Range Starts Here-----------------
+
+
+const selectWeather = (result) => {
+    return inquirer.prompt([{
+        type: 'checkbox',
+        message: 'Select weather conditions to be searched',
+        name: 'miles',
+        choices: ['Clear', 'Light Cloud', 'Heavy Cloud', 'Showers', 'Light Rain', 'Heavy Rain', 'Thunderstorm', 'Hail', 'Sleet', 'Snow'],
+        validate: (answer) => {
+            if (answer.length > 0) {
+
+                return true
+
+            } else {
+                return 'Error: You must select at least one choice'
+            }
+        }
+
+    }]).then((answers) => {
+        
+        return inquirer.prompt([{
+            type: 'checkbox',
+            message: 'Select the range in miles to search',
+            name: 'miles',
+            choices: ['50', '100', '150', '200', '250', '300', '350'],
+            validate: (answer) => {
+                if (answer.length > 1 || answer.length === 0) {
+
+                    return 'Error: You must select 1 choice only'
+
+                } else {
+                    return true
+                }
+            }
+
+        }]).then((input) => {
+
+            
+            const
+                range = milesToMeters(parseInt(input.miles[0])),
+                withinRange = [],
+                selectedWeather =[]
+
+                answers.miles.forEach(weather =>{selectedWeather.push(weather)})
+
+            result.forEach(city => {
+                //the selected range will be used to get all the forecast of the cities
+                if (city.distance <= range)
+                    withinRange.push(city)
+            })
+            
+                foreCastForCitiesInRange(withinRange,selectedWeather)
+
+        })
+
+
+    })
+
+}
+
+
+const searchWeatherWithinRange = (location) => {
     let
         lattLong = []
 
@@ -159,9 +253,7 @@ const surroundingCitiesWeather = (location) => {
                 weather.woeid_by_lattlong(lattLong[0], lattLong[1])
                     .then(result => {
 
-                        selectRange(result)
-
-
+                        selectWeather(result)
 
                     })
                     .catch(err => console.log(err))
@@ -170,13 +262,30 @@ const surroundingCitiesWeather = (location) => {
         })
         .catch(err => console.log(err))
 
-
 }
 
+function searchWeather(cities, weather){
 
+    result = []
+    cities.forEach(city=>{
+
+        for (let index = 0; index < weather.length; index++) {
+            if(city.conditions === weather[index])
+            result.push(city)
+            
+        }
+    })
+    if(result.length === 0){
+        console.log('Sorry there are no results for the miles and weather condition specified.')
+    }
+    else{
+    console.log(result)
+    }
+}
 
 module.exports = {
     locationWeather,
     lattLongWeather,
-    surroundingCitiesWeather
+    surroundingCitiesWeather,
+    searchWeatherWithinRange
 }

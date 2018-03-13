@@ -32,12 +32,12 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
 
     .command({
         command:'getSurroundingWeather',
-        desc: 'Get WOEID at a specific latitude and longitude',
+        desc: 'Returns the forecast of the surrounding cities within the user specified range.',
         alias: 'sw',
         builder:(yargs)=>{
             return yargs.option('l',{
                 alias : 'location',
-                describe: 'Gets the weather of the cities within 30 miles of the city you are searching'
+                describe: 'Getting weather for specific location'
             })
         },
         handler: (argv) => {
@@ -45,6 +45,20 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
         }
     })
 
-    
+    .command({
+        command:'searchSurroundingWeather',
+        desc: 'Searches the surrounding cities with the user specified weather condition, and range.',
+        alias: 'sw',
+        builder:(yargs)=>{
+            return yargs.option('l',{
+                alias : 'location',
+                describe: 'Getting weather for specific location'
+            })
+        },
+        handler: (argv) => {
+            app.searchWeatherWithinRange(argv.location)
+        }
+    })
+
     .help('help')
     .argv
