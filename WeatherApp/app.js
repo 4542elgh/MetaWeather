@@ -25,8 +25,8 @@ const celsiusToFahrenheit = (degree) => {
 const filterForecast = (selections, response) => {
     let filteredForecast = {}
 
-    for (let i = 0; i < selections.conditions.length; i++) {
-        switch (selections.conditions[i]) {
+    for (let i = 0; i < selections.length; i++) {
+        switch (selections[i]) {
             case 'forecast':
             filteredForecast['forecast'] = response.weather_state_name
                 break;
@@ -58,44 +58,91 @@ const filterForecast = (selections, response) => {
     return filteredForecast
 }
 
-const filterSearch = (location, dateRange) => {
+const getDateRange = (dateRange) => {
+    let response = []
+    if(dateRange !== null) {
+        let currentDate = new Date(dateRange[0])
+        let endDate = new Date(dateRange[1])
+        let dayCounter = 1
 
+        while(currentDate <= endDate) {
+            response.push({
+                year: currentDate.getFullYear(),
+                month: currentDate.getMonth(),
+                day: currentDate.getDate()
+            })
+            currentDate.setDate(currentDate.getDate() + (dayCounter++))
+        }
+    }
+    return response  
+}
+
+const forecastAtDay = (response, selections, range=0) => {
+    let forecastCopy
+
+    response.then(forecasts => {
+        if(range === 0) {
+            forecastCopy = forecasts.consolidated_weather[0]
+        }
+        else {
+            forecastCopy = forecasts[0]
+        }
+
+        let filteredForecast = filterForecast(selections, forecastCopy)
+        console.log(filteredForecast)
+    })
+}
+
+const getFilters = () => {
     let conditions = ['forecast', 'temperature', 'air', 'wind', 'exit']
-    let response
 
+    return inquirer.prompt([{
+        type: 'checkbox',
+        message: 'Select the conditions to display:\n',
+        name: 'conditions',
+        choices: conditions,
+        validate: (filters) => {
+            if (filters.length > 1 && filters.indexOf('exit') > -1) {
+                return 'Only select exit to return to main menu'
+            }
+            if (filters.length != 0) {
+                return true
+            } 
+            return 'Not a valid selection'
+        }
+    }])
+}
+
+const getForecasts = (location, days, selections) => {
     weather.woeid_by_query(location)
         
         .then(result => {
+            //if location not found
             if (result.length === 0) {
                 console.log(`No data for ${location}`)
                 return
             }
-            return weather.get_weather_by_woeid(result[0].woeid)
-        })
 
-        .then(forecasts => {
-            response = forecasts.consolidated_weather[0]
-            return inquirer.prompt([{
-                type: 'checkbox',
-                message: 'Select the conditions to display:\n',
-                name: 'conditions',
-                choices: conditions,
-                validate: (filters) => {
-                    if (filters.length > 1 && filters.indexOf('exit') > -1) {
-                        return 'Only select exit to return to main menu'
-                    }
-                    if (filters.length != 0) {
-                        return true
-                    } 
-                    return 'Not a valid selection'
-                }
-            }])
-        })
+            //no date range specified
+            if(days.length === 0) {
+                forecastAtDay(weather.get_weather_by_woeid(result[0].woeid), selections)
+            }
 
-        .then(selections => {
-            let filteredForecast = filterForecast(selections, response)
-            console.log(filteredForecast)
+            days.forEach(day => {
+                forecastAtDay(weather.get_weather_by_woeid_at_date(result[0].woeid, 
+                    day.year, day.month + 1, day.day), selections, 1)
+            })
         })
+}
+
+const filterSearch = (location, dateRange) => {
+    let days = getDateRange(dateRange)
+
+    getFilters()
+        .then(filters => {
+            getForecasts(location, days, filters.conditions)
+        })
+    
 }
 
 module.exports = {
