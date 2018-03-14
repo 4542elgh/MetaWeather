@@ -29,5 +29,18 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
             app.lattLongWeather(argv.lattlong)
         }
     })
+    .command({
+        command:'history',
+        desc: 'displays previous search results',
+        builder:(yargs)=>{
+            return yargs.option('h',{
+                alias : 'history',
+                describe: 'displays history'
+            })
+        },
+        handler: (argv) => {
+            app.displayHistory()
+        }
+    })
     .help('help')
     .argv

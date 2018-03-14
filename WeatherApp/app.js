@@ -1,5 +1,7 @@
 const
-    weather = require('../MetaWeatherAPI/index')
+    weather = require('../MetaWeatherAPI/index'),
+    filename = 'weatherSearchHistory.json',
+    fs = require('fs');
 // inquirer = require('inquirer')
 
 const locationWeather = (location) => {
@@ -20,8 +22,6 @@ const lattLongWeather = (latt, long) => {
 }
 
 const history = (result) => {
-    const fs = require('fs');
-    const filename = 'weatherSearchHistory.json';
 
     function createFile(result) {
         fs.open(filename, 'r', function (err, fd) {
@@ -33,7 +33,7 @@ const history = (result) => {
                         console.log(err);
                     }
                     console.log("Search history file not found. Search history file has been created.");
-                    console.log("Seach result saved to serch history file.\nCurrently saved results: " + result.length + "\nMax number of saved resutls is 5.");
+                    console.log("Seach results saved: " + result.length + " of 5.");
                 });
             }
 
@@ -61,7 +61,7 @@ const history = (result) => {
 
                     //write updated array to file
                     fs.writeFile(filename, JSON.stringify(historyDataArray), (err) => {
-                        console.log("Seach result saved to serch history file.\nCurrently saved results: " + historyDataArray.length + "\nMax number of saved resutls is 5.");
+                        console.log("Seach results saved: " + historyDataArray.length + " of 5.");
                         if (err) {
                             console.log(err);
                         }
@@ -77,7 +77,21 @@ const history = (result) => {
     createFile(result);
 }
 
+const displayHistory = () => {
+    fs.readFile(filename, (err, data) => {
+        if (err) {
+            console.log("You can't display search history when nothing has been searched!! ):<")
+        }
+        else {
+            var historyDataArray = JSON.parse(data);
+            for (var x = 0; x < historyDataArray.length; x++) {
+                console.log(historyDataArray[x])
+            }
+        }
+    })
+}
+
 module.exports = {
     locationWeather, lattLongWeather,
-    history
+    history, displayHistory
 }
