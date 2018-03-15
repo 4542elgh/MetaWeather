@@ -26,7 +26,7 @@ const history = (result) => {
 }
 
 const createFile = (result)=>{
-    fs.open(filename, 'r', function (err, fd) {
+    fs.open(filename, 'r', (err, fd)=> {
 
         //create file if it doesn't already exist
         if (err) {
@@ -47,7 +47,8 @@ const createFile = (result)=>{
                 let historyDataArray = [];
                 try{
                     historyDataArray = JSON.parse(data)
-                }catch(SyntaxError) {
+                }
+                catch(SyntaxError) {
                     historyDataArray =[]
                 }
 
@@ -88,7 +89,13 @@ const displayHistory = () => {
             console.log("You can't display search history when nothing has been searched!! ):<")
         }
         else {
-            let historyDataArray = JSON.parse(data);
+            let historyDataArray=[];
+            try{
+                historyDataArray = JSON.parse(data)
+            }
+            catch (SyntaxError){
+                historyDataArray=['Back to Main Menu']
+            }
             inquirerDisplay(historyDataArray).then(result=>{
                 //deal with inquirer selected option
             })
@@ -99,10 +106,15 @@ const displayHistory = () => {
 const inquirerDisplay = (choices) =>{
     let choice = [];
 
-    //fetch so top is most recent
-    choices.forEach((item,index)=>{
-        choice[choices.length-1-index]=item.title
-    })
+    if (choices[0] == 'Back to Main Menu'){
+        choice = ['Back to Main Menu']
+    }
+    else{
+        //fetch so top is most recent
+        choices.forEach((item,index)=>{
+            choice[choices.length-1-index]=item.title
+        })
+    }
 
     return inquirer.prompt({
         type:'list',
