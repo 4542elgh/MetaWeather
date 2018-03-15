@@ -1,65 +1,9 @@
 const
     weather = require('../MetaWeatherAPI/index'),
     CLI = require('./InteractiveCLI'),
-    inquirer = require('inquirer');
+    inquirer = require('inquirer'),
+    test = require('./test');
 
-const locationWeather_woeid = (location) => {
-    weather.woeid_by_query(location)
-        .then(result=>{
-            let array = [];
-            result.forEach(item=>{
-                array.push(item.title);
-            })
-
-            CLI.interactiveCLI(array)
-                .then(result=>{
-                    weather.woeid_by_query(result.location)
-                        .then(result=>{
-                            // console.log(result[0].woeid)
-                            weather.get_weather_by_woeid(result[0].woeid)
-                                .then(result=>{
-                                   print(result.consolidated_weather);
-                                    menu_recur()
-                                })
-                        })
-                })
-        })
-        .catch(err => console.log(err))
-}
-//
-// const lattLongWeather_woeid = (latt,long) => {
-//     weather.woeid_by_lattlong(latt,long)
-//         .then(result=>{
-//             let array = [];
-//             result.forEach(item=>{
-//                 array.push(item.title);
-//             })
-//
-//             CLI.interactiveCLI(array)
-//                 .then(result=>{
-//                    weather.woeid_by_query(result.location)
-//                        .then(result=>{
-//                            // console.log(result[0].woeid)
-//                            weather.get_weather_by_woeid(result[0].woeid)
-//                                .then(result=>{
-//                                    console.log(result)
-//                                })
-//                        })
-//                 })
-//             // console.log(result);
-//         })
-//         .catch(err => console.log(err))
-// }
-
-const print = (result)=>{
-    result.forEach(item=>{
-        console.log(`Date: ${item.applicable_date} \n   Weather state: ${item.weather_state_name}\n   Min: ${Math.round(FtoC(item.min_temp))}°F \n   Max: ${Math.round(FtoC(item.max_temp))}°F\n`)
-    })
-}
-
-const FtoC=(F)=>{
-    return (F*(9/5)+32);
-}
 
 const ui = ()=>{
     return inquirer.prompt([{
@@ -82,7 +26,7 @@ const menu = ()=>{
         type:'list',
         message:'Menu:',
         name:'option',
-        choices:['history','exit'],
+        choices:[new inquirer.Separator('---Search---'),'Today','Date Range','Radius',new inquirer.Separator('-----------'),'history','exit'],
         validate:(choices)=>{
             if(choices>1 || choices<0){
                 return false;
@@ -99,7 +43,11 @@ const menu_recur = ()=>{
             switch(result.option){
                 case 'history' : {
                     ui().then(result=>{
-                        locationWeather_woeid(result.location)
+                      test.locationWeather_woeid(result.location);
+                      setTimeout(()=>{
+                          console.log(test.returnString());
+                          return menu_recur()}
+                          ,5000)
                     })
                     break;
                 }
