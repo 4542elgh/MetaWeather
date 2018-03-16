@@ -20,7 +20,6 @@ const ui = ()=>{
         }
     }])
 }
-
 const menu = ()=>{
     return inquirer.prompt([{
         type:'list',
