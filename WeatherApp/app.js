@@ -52,11 +52,11 @@ const selectRange = (result) => {
 }
 
 //utility functions
-function milesToMeters(miles) {
+const milesToMeters = (miles)=> {
     return miles * 1609.34
 }
 
-function metersToMiles(meters) {
+const metersToMiles = (meters)=> {
     if(meters === 0){
         return 0 
     }
@@ -65,12 +65,12 @@ function metersToMiles(meters) {
 }
 
 
-function celsiusToFarenheit(celsius) {
+const celsiusToFarenheit= (celsius) =>{
     const farenheit = (celsius * (9 / 5) + 32).toPrecision(4)
     return farenheit
 }
 
-function sortResults(cities) {
+const sortResults = (cities)=> {
 
     let
         swapped = true,
@@ -98,7 +98,7 @@ function sortResults(cities) {
 
 }
 //used an empty parameter here in order to reuse this function for another feature
-function foreCastForCitiesInRange(cities, weatherToSearch = []) {
+const foreCastForCitiesInRange =(cities, weatherToSearch = []) => {
     const citiesInfo = []
     cities.forEach(city => {
         //getting the weather info for each city in range using the WOEID(Where on Earth ID)
@@ -252,7 +252,7 @@ const searchWeatherWithinRange = (location) => {
 
 }
 
-function searchWeather(cities, weather){
+const searchWeather = (cities, weather)=>{
 
     result = []
     cities.forEach(city=>{
@@ -271,7 +271,7 @@ function searchWeather(cities, weather){
     }
 }
 
-function print(result){
+const print =(result)=>{
 
     let table = new Table({
         chars: { 'top': '═'.magenta , 'top-mid': '╤'.magenta , 'top-left': '╔'.magenta , 'top-right': '╗'.magenta
