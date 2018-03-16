@@ -29,11 +29,10 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
             app.lattLongWeather(argv.lattlong)
         }
     })
-
     .command({
-        command:'getSurroundingWeather',
+        command:'searchDistance',
         desc: 'Returns the forecast of the surrounding cities within the user specified range.',
-        alias: 'sw',
+        alias: 'sd',
         builder:(yargs)=>{
             return yargs.option('l',{
                 alias : 'location',
@@ -44,11 +43,10 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
             app.surroundingCitiesWeather(argv.location)
         }
     })
-
     .command({
-        command:'searchSurroundingWeather',
+        command:'searchWeatherAndDistance',
         desc: 'Searches the surrounding cities with the user specified weather condition, and range.',
-        alias: 'sw',
+        alias: 'wd',
         builder:(yargs)=>{
             return yargs.option('l',{
                 alias : 'location',

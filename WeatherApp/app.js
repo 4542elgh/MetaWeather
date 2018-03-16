@@ -1,6 +1,8 @@
 const
     weather = require('../MetaWeatherAPI/index'),
-    inquirer = require('inquirer')
+    inquirer = require('inquirer'),
+    Table = require('cli-table2'),
+    colors = require('colors')
 
 const locationWeather = (location) => {
     weather.woeid_by_query(location)
@@ -55,23 +57,13 @@ function milesToMeters(miles) {
 }
 
 function metersToMiles(meters) {
+    if(meters === 0){
+        return 0 
+    }
+    else
     return (meters / 1609.34).toPrecision(4)
 }
 
-function formattingTime(date) {
-    //the numbers and formatting the times of some properties
-    let T = date.indexOf('T')
-    let time = date.slice(T + 1, T + 6)
-    if (time[0] === '0') {
-        time = time.slice(1)
-        return time
-    } else {
-        //coverting military time to 12 hr format
-        let hour = parseInt(time.slice(0, 2)) % 12
-        time = hour + time.slice(2)
-        return time
-    }
-}
 
 function celsiusToFarenheit(celsius) {
     const farenheit = (celsius * (9 / 5) + 32).toPrecision(4)
@@ -115,20 +107,16 @@ function foreCastForCitiesInRange(cities, weatherToSearch = []) {
             //but as soon as the API has a response for that city.
             //Also we only want the forecasts of the day the query is made so the other days are of no cosequence
             .then(result => {
-
+                
                 citiesInfo.push({
                     cityName: result.title,
-                    distance: city.distance,
+                    distance: city.distance, //need the distance in order to order them from closest to farthest
                     conditions: result.consolidated_weather[0].weather_state_name,
-                    temperature: celsiusToFarenheit(result.consolidated_weather[0].the_temp),
+                    temperature: celsiusToFarenheit(result.consolidated_weather[0].the_temp) + '°F',
                     minTemp: celsiusToFarenheit(result.consolidated_weather[0].min_temp),
-                    maxTemp: celsiusToFarenheit(result.consolidated_weather[0].max_temp), //temperatures are in celsius
-                    windDirection: result.consolidated_weather[0].wind_direction_compass,
-                    windSpeed: result.consolidated_weather[0].wind_speed.toPrecision(3),
+                    maxTemp: celsiusToFarenheit(result.consolidated_weather[0].max_temp), 
                     humidity: result.consolidated_weather[0].humidity + '%',
-                    visibility: result.consolidated_weather[0].visibility.toPrecision(4),
-                    sunRise: formattingTime(result.sun_rise) + ' AM',
-                    sunSet: formattingTime(result.sun_set) + ' PM',
+                    air_pressure:result.consolidated_weather[0].air_pressure.toPrecision(4) + ' mb'
                 })
 
                 //reorganize the list of cities by distance in ascending order, 
@@ -136,7 +124,7 @@ function foreCastForCitiesInRange(cities, weatherToSearch = []) {
                 if (cities.length === citiesInfo.length ) {
                    
                    if(weatherToSearch.length == 0)
-                    console.log(sortResults(citiesInfo))
+                    print(sortResults(citiesInfo))
 
                     else{
                         searchWeather(sortResults(citiesInfo), weatherToSearch)
@@ -279,10 +267,28 @@ function searchWeather(cities, weather){
         console.log('Sorry there are no results for the miles and weather condition specified.')
     }
     else{
-    console.log(result)
+    print(result)
     }
 }
 
+function print(result){
+
+    let table = new Table({
+        chars: { 'top': '═'.magenta , 'top-mid': '╤'.magenta , 'top-left': '╔'.magenta , 'top-right': '╗'.magenta
+               , 'bottom': '═'.magenta , 'bottom-mid': '╧'.magenta , 'bottom-left': '╚'.magenta , 'bottom-right': '╝'.magenta
+               , 'left': '║'.magenta , 'left-mid': '╟'.magenta , 'mid': '─'.magenta , 'mid-mid': '┼'.magenta
+               , 'right': '║'.magenta , 'right-mid': '╢'.magenta , 'middle': '│'.magenta },
+
+        head: ['CITY'.cyan.bold, 'DISTANCE'.cyan.bold, 'CONDITIONS'.cyan.bold,'TEMPATURE'.cyan.bold,'LOW'.cyan.bold,'HIGH'.cyan.bold,'HUMIDITY'.cyan.bold,'AIR PRESSURE'.cyan.bold ]
+      });
+       
+      result.forEach(city =>{
+        table.push([city.cityName.white, city.distance.white, city.conditions.white,city.temperature.white,city.minTemp.white, city.maxTemp.white, city.humidity.white, city.air_pressure.white])
+      })
+
+      console.log(table.toString())
+
+}
 module.exports = {
     locationWeather,
     lattLongWeather,
