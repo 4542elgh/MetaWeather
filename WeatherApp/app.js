@@ -113,8 +113,8 @@ function foreCastForCitiesInRange(cities, weatherToSearch = []) {
                     distance: city.distance, //need the distance in order to order them from closest to farthest
                     conditions: result.consolidated_weather[0].weather_state_name,
                     temperature: celsiusToFarenheit(result.consolidated_weather[0].the_temp) + '°F',
-                    minTemp: celsiusToFarenheit(result.consolidated_weather[0].min_temp),
-                    maxTemp: celsiusToFarenheit(result.consolidated_weather[0].max_temp), 
+                    minTemp: celsiusToFarenheit(result.consolidated_weather[0].min_temp) + '°F' ,
+                    maxTemp: celsiusToFarenheit(result.consolidated_weather[0].max_temp) + '°F', 
                     humidity: result.consolidated_weather[0].humidity + '%',
                     air_pressure:result.consolidated_weather[0].air_pressure.toPrecision(4) + ' mb'
                 })
