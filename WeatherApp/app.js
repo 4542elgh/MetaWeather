@@ -1,19 +1,19 @@
 const
     weather = require('../MetaWeatherAPI/index')
-    inquirer = require('inquirer')
-    Table = require('cli-table2')
+inquirer = require('inquirer')
+Table = require('cli-table2')
 
 const locationWeather = (location) => {
     weather.woeid_by_query(location)
-        .then(result=>{
+        .then(result => {
             console.log(result)
         })
         .catch(err => console.log(err))
 }
 
-const lattLongWeather = (latt,long) => {
-    weather.woeid_by_lattlong(latt,long)
-        .then(result=>{
+const lattLongWeather = (latt, long) => {
+    weather.woeid_by_lattlong(latt, long)
+        .then(result => {
             console.log(result)
         })
         .catch(err => console.log(err))
@@ -29,7 +29,7 @@ const filterForecast = (selections, response) => {
     for (let i = 0; i < selections.length; i++) {
         switch (selections[i]) {
             case 'forecast':
-            filteredForecast['forecast'] = response.weather_state_name
+                filteredForecast['forecast'] = response.weather_state_name
                 break;
             case 'temperature':
                 let temperature = {
@@ -62,30 +62,30 @@ const filterForecast = (selections, response) => {
 // creates the array of dates
 const getDateRange = (dateRange) => {
     let response = []
-    if(dateRange !== null) {
+    if (dateRange !== null) {
         let currentDate = new Date(dateRange[0])
         let endDate = new Date(dateRange[1])
-        let dayCounter = 1
 
-        while(currentDate <= endDate) {
+        while (currentDate <= endDate) {
             response.push({
                 year: currentDate.getFullYear(),
                 month: currentDate.getMonth(),
                 day: currentDate.getDate()
             })
-            currentDate.setDate(currentDate.getDate() + (dayCounter++))
+            currentDate.setDate(currentDate.getDate() + 1)
         }
     }
-    return response  
+    return response
 }
 
 // gets forecasts of location
 const getForecasts = (location, days, selections) => {
     weather.woeid_by_query(location)
-        
+
         .then(result => {
             let date = new Date()
-            let dateStr = `${date.getMonth() +1}-${date.getDate()}-${date.getFullYear()}`
+            let dateStr = ''
+            let dateArr = []
 
             //if location not found
             if (result.length === 0) {
@@ -94,20 +94,38 @@ const getForecasts = (location, days, selections) => {
             }
 
             //no date range specified
-            if(days.length === 0) {
-                printForecast(weather.get_weather_by_woeid(result[0].woeid), selections, dateStr)
+            if (days.length === 0) {
+                dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
+                printForecast(weather.get_weather_by_woeid(result[0].woeid), selections, dateStr, dateArr)
             }
 
             days.forEach(day => {
-                printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid, 
-                    day.year, day.month + 1, day.day), selections, dataStr, 1)
+                dateStr = `${day.month + 1}-${day.day}-${day.year}`
+                printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid,
+                    day.year, day.month + 1, day.day), selections, dateStr, dateArr, 1)
             })
+
+            //find a better interval
+            //currently this is a hack to allow for the printing of the date range or today's date
+            setTimeout(() => {
+                dateArr.sort((a, b) => {
+                    let A = new Date(a.date),
+                        B = new Date(b.date)
+
+                    if(A < B) return -1
+                    if(A > B) return 1
+                    return 0
+                })
+                dateArr.forEach(index => {
+                    console.log(index.output)
+                })
+            }, 5000)
         })
 }
 
 // formats print
 const formatForecast = (dateStr, filteredForecast) => {
-    let table = new Table({ style: { head: [], boder: [] } })
+    let table = new Table({ style: { head: [], border: [] } })
     table.push([{
         colSpan: 2, content: `${dateStr}`
     }])
@@ -132,11 +150,12 @@ const formatForecast = (dateStr, filteredForecast) => {
     return table
 }
 
-const printForecast = (response, selections, dateStr, range=0) => {
+const printForecast = (response, selections, dateStr, dateArr, range = 0) => {
     let forecastCopy
+    let output
 
     response.then(forecasts => {
-        if(range === 0) {
+        if (range === 0) {
             forecastCopy = forecasts.consolidated_weather[0]
         }
         else {
@@ -144,8 +163,16 @@ const printForecast = (response, selections, dateStr, range=0) => {
         }
 
         let filteredForecast = filterForecast(selections, forecastCopy)
-        console.log(formatForecast(dateStr, filteredForecast).toString())
+        // console.log(formatForecast(dateStr, filteredForecast).toString())
+
+        dateArr.push({
+            date: dateStr,
+            output: formatForecast(dateStr, filteredForecast).toString()
+        })
+    }).catch(err => {
+        console.log(err)
     })
+
 }
 
 // gives inquirer prompt with all filters
@@ -163,7 +190,7 @@ const getWeatherFilters = () => {
             }
             if (filters.length != 0) {
                 return true
-            } 
+            }
             return 'Not a valid selection'
         }
     }])
@@ -177,9 +204,9 @@ const filterSearch = (location, dateRange) => {
         .then(filters => {
             getForecasts(location, days, filters.conditions)
         })
-    
+
 }
 
 module.exports = {
-    locationWeather,lattLongWeather, filterSearch
+    locationWeather, lattLongWeather, filterSearch
 }
