@@ -5,7 +5,7 @@ const selectRange_inquirer = ()=>{
         type: 'list',
         message: 'Select the range in miles to search',
         name: 'miles',
-        choices: ['50', '100', '150', '200', '250', '300', '350'],
+        choices: ['50 miles', '100 miles', '150 miles', '200 miles', '250 miles', '300 miles', '350 miles'],
         validate: (answer) => {
             if (answer.length > 1 || answer.length === 0) {
 
