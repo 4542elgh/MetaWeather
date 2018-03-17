@@ -4,7 +4,7 @@ const
     Table = require('cli-table2'),
     colors = require('colors'),
     CLI = require('./InteractiveCLI'),
-    search = require('./search')
+    utilities = require('./utils/utilities')
 
 const ui = ()=>{
     return inquirer.prompt([{
@@ -43,7 +43,7 @@ const menu_recur = ()=>{
             switch(result.option){
                 case 'Today' : {
                     ui().then(result=>{
-                        filterSearch(result.location,3);
+                        // filterSearch(result.location,3);
                     })
                     break;
                 }
@@ -64,50 +64,6 @@ const menu_recur = ()=>{
             }
     })
 }
-
-const getForecasts = (location, days, selections) => {
-    weather.woeid_by_query(location)
-        .then(result => {
-            let date = new Date()
-            let dateStr = `${date.getMonth() +1}-${date.getDate()}-${date.getFullYear()}`
-
-            //if location not found
-            if (result.length === 0) {
-                console.log(`No data for ${location}`)
-                return
-            }
-
-            //no date range specified
-            if(days.length === 0) {
-                printForecast(weather.get_weather_by_woeid(result[0].woeid), selections, dateStr)
-            }
-
-            days.forEach(day => {
-                printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid,
-                    day.year, day.month + 1, day.day), selections, dataStr, 1)
-            })
-        })
-}
-
-const printForecast = (response, selections, dateStr, range=0) => {
-    let forecastCopy
-    response.then(forecasts => {
-        range === 0? forecastCopy = forecasts.consolidated_weather[0] : forecastCopy = forecasts[0]
-
-        let filteredForecast = search.filterForecast(selections, forecastCopy)
-        console.log(search.formatForecast(dateStr, filteredForecast).toString())
-        return menu_recur()
-    })
-}
-const filterSearch = (location, dateRange) => {
-    let days = search.getDateRange(dateRange)
-
-    search.getWeatherFilters()
-        .then(filters => {
-            getForecasts(location, days, filters.conditions)
-        })
-}
-
 const selectRange = (result) => {
     return inquirer.prompt([{
         type: 'checkbox',
@@ -126,7 +82,7 @@ const selectRange = (result) => {
 
     }]).then((answers) => {
         const
-            range = milesToMeters(parseInt(answers.miles[0])),
+            range = utilities.milesToMeters(parseInt(answers.miles[0])),
             withinRange = []
 
         result.forEach(city => {
@@ -137,25 +93,6 @@ const selectRange = (result) => {
 
         foreCastForCitiesInRange(withinRange)
     })
-}
-
-//utility functions
-const milesToMeters = (miles)=> {
-    return miles * 1609.34
-}
-
-const metersToMiles = (meters)=> {
-    if(meters === 0){
-        return 0 
-    }
-    else
-    return (meters / 1609.34).toPrecision(4)
-}
-
-
-const celsiusToFarenheit= (celsius) =>{
-    const farenheit = (celsius * (9 / 5) + 32).toPrecision(4)
-    return farenheit
 }
 
 const sortResults = (cities)=> {
@@ -179,7 +116,7 @@ const sortResults = (cities)=> {
         }
     }
     cities.forEach(city => {
-        city.distance = metersToMiles(city.distance) + ' miles'
+        city.distance = utilities.metersToMiles(city.distance) + ' miles'
     })
 
     return cities
@@ -200,9 +137,9 @@ const foreCastForCitiesInRange =(cities, weatherToSearch = []) => {
                     cityName: result.title,
                     distance: city.distance, //need the distance in order to order them from closest to farthest
                     conditions: result.consolidated_weather[0].weather_state_name,
-                    temperature: celsiusToFarenheit(result.consolidated_weather[0].the_temp) + '°F',
-                    minTemp: celsiusToFarenheit(result.consolidated_weather[0].min_temp) + '°F' ,
-                    maxTemp: celsiusToFarenheit(result.consolidated_weather[0].max_temp) + '°F', 
+                    temperature: utilities.CtoF(result.consolidated_weather[0].the_temp) + '°F',
+                    minTemp: utilities.CtoF(result.consolidated_weather[0].min_temp) + '°F' ,
+                    maxTemp: utilities.CtoF(result.consolidated_weather[0].max_temp) + '°F',
                     humidity: result.consolidated_weather[0].humidity + '%',
                     air_pressure:result.consolidated_weather[0].air_pressure.toPrecision(4) + ' mb'
                 })
@@ -291,7 +228,7 @@ const selectWeather = (result) => {
 
             
             const
-                range = milesToMeters(parseInt(input.miles[0])),
+                range = utilities.milesToMeters(parseInt(input.miles[0])),
                 withinRange = [],
                 selectedWeather =[]
 
