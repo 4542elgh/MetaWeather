@@ -1,10 +1,11 @@
 const
     weather = require('../MetaWeatherAPI/index'),
     inquirer = require('inquirer'),
-    Table = require('cli-table2'),
     colors = require('colors'),
     CLI = require('./InteractiveCLI'),
-    utilities = require('./utils/utilities')
+    utilities = require('./utils/utilities'),
+    rangeSearch = require('./RangeSearch/rangeSearch')
+    rangeSearch_inquirer = require('./RangeSearch/inquirer')
 
 const ui = ()=>{
     return inquirer.prompt([{
@@ -21,6 +22,7 @@ const ui = ()=>{
         }
     }])
 }
+
 const menu = ()=>{
     return inquirer.prompt([{
         type:'list',
@@ -65,63 +67,22 @@ const menu_recur = ()=>{
     })
 }
 const selectRange = (result) => {
-    return inquirer.prompt([{
-        type: 'checkbox',
-        message: 'Select the range in miles to search',
-        name: 'miles',
-        choices: ['50', '100', '150', '200', '250', '300', '350'],
-        validate: (answer) => {
-            if (answer.length > 1 || answer.length === 0) {
+    rangeSearch_inquirer.selectRange_inquirer()
+        .then((answers) => {
+            const
+                range = utilities.milesToMeters(parseInt(answers.miles)),
+                withinRange = []
 
-                return 'Error: You must select 1 choice only'
-
-            } else {
-                return true
-            }
-        }
-
-    }]).then((answers) => {
-        const
-            range = utilities.milesToMeters(parseInt(answers.miles[0])),
-            withinRange = []
-
-        result.forEach(city => {
-            //the selected range will be used to get all the forecast of the cities
-            if (city.distance <= range)
-                withinRange.push(city)
+            result.forEach(city => {
+                //the selected range will be used to get all the forecast of the cities
+                if (city.distance <= range)
+                    withinRange.push(city)
         });
-
         foreCastForCitiesInRange(withinRange)
     })
 }
 
-const sortResults = (cities)=> {
 
-    let
-        swapped = true,
-        j = 0,
-        temp = {}
-
-    while (swapped) {
-        swapped = false
-        j++
-        for (let k = 0; k < cities.length - j; k++) {
-
-            if (cities[k].distance > cities[k + 1].distance) {
-                swapped = true
-                temp = cities[k]
-                cities[k] = cities[k + 1]
-                cities[k + 1] = temp
-            }
-        }
-    }
-    cities.forEach(city => {
-        city.distance = utilities.metersToMiles(city.distance) + ' miles'
-    })
-
-    return cities
-
-}
 //used an empty parameter here in order to reuse this function for another feature
 const foreCastForCitiesInRange =(cities, weatherToSearch = []) => {
     const citiesInfo = []
@@ -149,14 +110,12 @@ const foreCastForCitiesInRange =(cities, weatherToSearch = []) => {
                 if (cities.length === citiesInfo.length ) {
                    
                    if(weatherToSearch.length == 0)
-                    print(sortResults(citiesInfo))
+                    print(rangeSearch.sortResults(citiesInfo))
 
                     else{
-                        searchWeather(sortResults(citiesInfo), weatherToSearch)
+                        searchWeather(rangeSearch.sortResults(citiesInfo), weatherToSearch)
                     }
                 }
-
-
             })
             .catch(err => console.log(err))
     })
@@ -192,59 +151,27 @@ const surroundingCitiesWeather = (location) => {
 
 
 const selectWeather = (result) => {
-    return inquirer.prompt([{
-        type: 'checkbox',
-        message: 'Select weather conditions to be searched',
-        name: 'miles',
-        choices: ['Clear', 'Light Cloud', 'Heavy Cloud', 'Showers', 'Light Rain', 'Heavy Rain', 'Thunderstorm', 'Hail', 'Sleet', 'Snow'],
-        validate: (answer) => {
-            if (answer.length > 0) {
-
-                return true
-
-            } else {
-                return 'Error: You must select at least one choice'
-            }
-        }
-
-    }]).then((answers) => {
+    rangeSearch_inquirer.selectWeather_inquirer()
+        .then((answers) => {
         
-        return inquirer.prompt([{
-            type: 'checkbox',
-            message: 'Select the range in miles to search',
-            name: 'miles',
-            choices: ['50', '100', '150', '200', '250', '300', '350'],
-            validate: (answer) => {
-                if (answer.length > 1 || answer.length === 0) {
+            rangeSearch_inquirer.selectRange_inquirer()
+                .then((input) => {
+                    const
+                        range = utilities.milesToMeters(parseInt(input.miles)),
+                        withinRange = [],
+                        selectedWeather =[]
 
-                    return 'Error: You must select 1 choice only'
+                        answers.miles.forEach(weather =>{
+                            selectedWeather.push(weather)
+                        })
 
-                } else {
-                    return true
-                }
-            }
-
-        }]).then((input) => {
-
-            
-            const
-                range = utilities.milesToMeters(parseInt(input.miles[0])),
-                withinRange = [],
-                selectedWeather =[]
-
-                answers.miles.forEach(weather =>{selectedWeather.push(weather)})
-
-            result.forEach(city => {
-                //the selected range will be used to get all the forecast of the cities
-                if (city.distance <= range)
-                    withinRange.push(city)
+                    result.forEach(city => {
+                        //the selected range will be used to get all the forecast of the cities
+                        if (city.distance <= range)
+                            withinRange.push(city)
+                    })
+                        foreCastForCitiesInRange(withinRange,selectedWeather)
             })
-            
-                foreCastForCitiesInRange(withinRange,selectedWeather)
-
-        })
-
-
     })
 
 }
@@ -253,7 +180,6 @@ const selectWeather = (result) => {
 const searchWeatherWithinRange = (location) => {
     let
         lattLong = []
-
 
     weather.woeid_by_query(location)
         .then(result => {
@@ -284,35 +210,20 @@ const searchWeather = (cities, weather)=>{
         for (let index = 0; index < weather.length; index++) {
             if(city.conditions === weather[index])
             result.push(city)
-            
         }
     })
     if(result.length === 0){
         console.log('Sorry there are no results for the miles and weather condition specified.')
     }
     else{
-    print(result)
+        print(result)
     }
 }
 
 const print =(result)=>{
-
-    let table = new Table({
-        chars: { 'top': '═'.magenta , 'top-mid': '╤'.magenta , 'top-left': '╔'.magenta , 'top-right': '╗'.magenta
-               , 'bottom': '═'.magenta , 'bottom-mid': '╧'.magenta , 'bottom-left': '╚'.magenta , 'bottom-right': '╝'.magenta
-               , 'left': '║'.magenta , 'left-mid': '╟'.magenta , 'mid': '─'.magenta , 'mid-mid': '┼'.magenta
-               , 'right': '║'.magenta , 'right-mid': '╢'.magenta , 'middle': '│'.magenta },
-
-        head: ['CITY'.cyan.bold, 'DISTANCE'.cyan.bold, 'CONDITIONS'.cyan.bold,'TEMPERATURE'.cyan.bold,'LOW'.cyan.bold,'HIGH'.cyan.bold,'HUMIDITY'.cyan.bold,'AIR PRESSURE'.cyan.bold ]
-      });
-       
-      result.forEach(city =>{
-        table.push([city.cityName.white, city.distance.white, city.conditions.white,city.temperature.white,city.minTemp.white, city.maxTemp.white, city.humidity.white, city.air_pressure.white])
-      })
-
-      console.log(table.toString())
-
+    console.log( rangeSearch.table(result).toString())
 }
+
 module.exports = {
     surroundingCitiesWeather,
     searchWeatherWithinRange,
