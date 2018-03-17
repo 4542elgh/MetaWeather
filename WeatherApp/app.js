@@ -204,7 +204,7 @@ const searchWeatherWithinRange = (location) => {
 
 const searchWeather = (cities, weather)=>{
 
-    result = []
+    let result = []
     cities.forEach(city=>{
 
         for (let index = 0; index < weather.length; index++) {
