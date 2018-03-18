@@ -96,10 +96,12 @@ const table = (result)=>{
             , 'left': '║'.magenta , 'left-mid': '╟'.magenta , 'mid': '─'.magenta , 'mid-mid': '┼'.magenta
             , 'right': '║'.magenta , 'right-mid': '╢'.magenta , 'middle': '│'.magenta },
 
-        head: ['CITY'.cyan.bold, 'DISTANCE'.cyan.bold, 'CONDITION'.cyan.bold,'TEMPERATURE'.cyan.bold,'LOW'.cyan.bold,'HIGH'.cyan.bold,'HUMIDITY'.cyan.bold,'WIND'.cyan.bold, 'AIR PRESSURE'.cyan.bold ]
+        head: [{hAlign:'center',content:'CITY'.cyan.bold}, {hAlign:'center',content:'DISTANCE'.cyan.bold}, {hAlign:'center',content:'CONDITION'.cyan.bold},{hAlign:'center',content:'TEMPERATURE'.cyan.bold},{hAlign:'center',content:'LOW'.cyan.bold},{hAlign:'center',content:'HIGH'.cyan.bold},{hAlign:'center',content:'HUMIDITY'.cyan.bold},{hAlign:'center',content:'WIND'.cyan.bold}, {hAlign:'center',content:'AIR PRESSURE'.cyan.bold} ],
+
+        
     });
     result.forEach(city =>{
-        table.push([city.cityName.white, city.distance.white, city.conditions.white,city.temperature.white,city.minTemp.white, city.maxTemp.white, city.humidity.white,city.wind.white, city.air_pressure.white])
+        table.push([{hAlign:'center', content:city.cityName.white}, {hAlign:'center', content:city.distance.white}, {hAlign:'center', content:city.conditions.white},{hAlign:'center', content:city.temperature.white},{hAlign:'center', content:city.minTemp.white}, {hAlign:'center', content:city.maxTemp.white},{hAlign:'center', content:city.humidity.white},{hAlign:'center', content:city.wind.white}, {hAlign:'center', content:city.air_pressure.white}])
     })
     return table;
 }
