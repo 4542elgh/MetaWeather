@@ -51,5 +51,17 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
             app.searchWeatherWithinRange(argv.location)
         }
     })
+    .command({
+        command:'search <location> [dateRange..]',
+        desc: 'Search weather by location',
+        handler: (argv) => {
+            if(argv.dateRange.length === 2 || argv.dateRange.length === 0) { //if we have a daterange, execute the search
+                app.filterSearch(argv.location, argv.dateRange)
+            }
+            else {
+                console.log('Unable to execute command. Date range input was invalid')
+            }
+        }
+    })
     .help('help')
     .argv
