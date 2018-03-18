@@ -108,6 +108,22 @@ const dateWeather = (location, startDate='', endDate='', range=0) => {
 const dateRangeWeather = (location) => {
     startDate().then(start => {
         endDate().then(end => {
+            let startDate = new Date(start.startDate)
+            let endDate = new Date(end.endDate)
+
+            if(startDate.toString() === 'Invalid Date'
+                || endDate.toString() === 'Invalid Date') {
+                    console.log('Invalid start or end date. Returning to main menu.')
+                    return menu_recur()
+                }
+
+
+            if(new Date(start.startDate) > new Date(end.endDate)) {
+                console.log('Error. Start date later than end date. Returning to main menu.')
+                return menu_recur()
+            }
+
+            
             filterSearch(location, [start.startDate, end.endDate])
         })
     })
