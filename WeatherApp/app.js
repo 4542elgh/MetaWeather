@@ -8,18 +8,18 @@ const
 const menu_recur = ()=>{
         mainLoop.menu().then(result=>{
             switch(result.option){
-                case 'Today' : {
+                case 'today' : {
                     mainLoop.ui().then(result=>{
                     })
                     break;
                 }
-                case 'Radius' :{
+                case 'radius' :{
                     mainLoop.radius_submenu().then(result=>{
                         if (result.option === 'exit'){
                             process.exit()
                         }
                         mainLoop.ui().then(location=>{
-                            if (result.option === 'Location + Radius'){
+                            if (result.option === 'location + radius'){
                                 surroundingCitiesWeather(location.location);
                             }
                             else {
