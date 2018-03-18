@@ -90,8 +90,10 @@ const surroundingCitiesWeather = (location) => {
     weather.woeid_by_query(location)
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
-            if (result.length === 0)
+            if (result.length === 0) {
                 console.log(`Sorry, there are no results in the MetaWeather API for ${location}.`)
+                return menu_recur()
+            }
             else {
                 lattLong = result[0].latt_long.split(',')
                 weather.woeid_by_lattlong(lattLong[0], lattLong[1])
@@ -123,8 +125,10 @@ const searchWeatherWithinRange = (location) => {
     weather.woeid_by_query(location)
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
-            if (result.length === 0)
+            if (result.length === 0){
                 console.log(`Sorry, there are no results in the MetaWeather API for ${location}.`)
+                return menu_recur()
+            }
             else {
                 lattLong = result[0].latt_long.split(',')
                 weather.woeid_by_lattlong(lattLong[0], lattLong[1])
