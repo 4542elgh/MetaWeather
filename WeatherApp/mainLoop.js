@@ -25,7 +25,7 @@ const menu = ()=>{
         type:'list',
         message:'Menu:',
         name:'option',
-        choices:[new inquirer.Separator('---Search---'),'Today','Date Range','Radius',new inquirer.Separator('-----------'),'history','exit'],
+        choices:[new inquirer.Separator('---Search---'),'today','date range','radius',new inquirer.Separator('-----------'),'history','exit'],
         validate:(choices)=>{
             if(choices>1 || choices<0){
                 return false;
@@ -42,7 +42,7 @@ const radius_submenu = ()=>{
         type:'list',
         message:'Menu:',
         name:'option',
-        choices:[new inquirer.Separator('---Search By Radius---'),'Location + Radius','Location + Weather Condition + Radius',new inquirer.Separator('-----------'),'exit'],
+        choices:[new inquirer.Separator('---Search By Radius---'),'location + radius','location + weather condition + radius',new inquirer.Separator('-----------'),'exit'],
         validate:(choices)=>{
             if(choices>1 || choices<0){
                 return false;

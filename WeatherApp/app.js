@@ -7,32 +7,32 @@ const
     inquirer = require('inquirer'), //temp <-- remove later
     Table = require('cli-table2')
 
-const menu_recur = () => {
-    mainLoop.menu().then(result => {
-        switch (result.option) {
-            case 'Today': {
-                mainLoop.ui().then(location => {
+const menu_recur = ()=>{
+    mainLoop.menu().then(result=>{
+        switch(result.option){
+            case 'today' : {
+                mainLoop.ui().then(location=>{
                     dateWeather(location.location)
                 })
                 break;
             }
-            case 'Date Range': {
+            case 'date range': {
                 mainLoop.ui().then(location => {
-                    dateRangeWeather(location.location)
+                dateRangeWeather(location.location)
                 })
                 break;
             }
-            case 'Radius': {
-                mainLoop.radius_submenu().then(result => {
-                    if (result.option === 'exit') {
+            case 'radius' :{
+                mainLoop.radius_submenu().then(result=>{
+                    if (result.option === 'exit'){
                         process.exit()
                     }
-                    mainLoop.ui().then(location => {
-                        if (result.option === 'Location + Radius') {
-                            surroundingCitiesWeather(location.location);
+                    mainLoop.ui().then(location=>{
+                        if (result.option === 'Location + Radius'){
+                            searchWeatherWithinRange(location.location)
                         }
                         else {
-                            searchWeatherWithinRange(location.location)
+                            surroundingCitiesWeather(location.location);
                         }
                     })
                 })
@@ -86,7 +86,7 @@ const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
                         print(rangeSearch.sortResults(citiesInfo))
                     }
                     else {
-                        searchWeather(rangeSearch.sortResults(citiesInfo), weatherToSearch)
+                        rangeSearch.searchWeather(rangeSearch.sortResults(citiesInfo), weatherToSearch)
                     }
                 }
             })
@@ -168,8 +168,10 @@ const surroundingCitiesWeather = (location) => {
     weather.woeid_by_query(location)
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
-            if (result.length === 0)
+            if (result.length === 0) {
                 console.log(`Sorry, there are no results in the MetaWeather API for ${location}.`)
+                return menu_recur()
+            }
             else {
                 lattLong = result[0].latt_long.split(',')
                 weather.woeid_by_lattlong(lattLong[0], lattLong[1])
@@ -201,8 +203,10 @@ const searchWeatherWithinRange = (location) => {
     weather.woeid_by_query(location)
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
-            if (result.length === 0)
+            if (result.length === 0){
                 console.log(`Sorry, there are no results in the MetaWeather API for ${location}.`)
+                return menu_recur()
+            }
             else {
                 lattLong = result[0].latt_long.split(',')
                 weather.woeid_by_lattlong(lattLong[0], lattLong[1])
@@ -250,10 +254,10 @@ const filterForecast = (selections, response) => {
 const getDateRange = (dateRange) => {
     let response = []
     let currentDate = new Date()
+    let startDate = new Date(dateRange[0])
+    let endDate = new Date(dateRange[1])
 
-    if ((dateRange !== null) && (dateRange <= currentDate) && (dateRange <= currentDate)) {
-        let startDate = new Date(dateRange[0])
-        let endDate = new Date(dateRange[1])
+    if ((dateRange !== null) && (startDate <= currentDate) && (endDate <= currentDate)) {
 
         while (startDate <= endDate) {
             response.push({
@@ -311,7 +315,10 @@ const getForecasts = (location, days, selections) => {
                 }, 5000)
             })
     }
-    return menu_recur()
+    else {
+        console.log('Invalid location. Returning to main menu.')
+        return menu_recur()
+    }
 }
 
 //note: write a better for key in object

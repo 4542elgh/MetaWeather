@@ -4,7 +4,7 @@ const
 
 const flags = yargs.usage('$0: Usage <cmd> [options]')
     .command({
-        command:'Menu',
+        command:'menu',
         desc: '-- MetaWeather Main Menu"',
         handler: () => {
             app.menu_recur()
