@@ -4,12 +4,15 @@ const
     mainLoop = require('./mainLoop'),
     rangeSearch = require('./RangeSearch/rangeSearch'),
     rangeSearch_inquirer = require('./RangeSearch/inquirer')
+    inquirer = require('inquirer') //temp <-- remove later
+    Table = require('cli-table2')
 
 const menu_recur = ()=>{
         mainLoop.menu().then(result=>{
             switch(result.option){
                 case 'Today' : {
-                    mainLoop.ui().then(result=>{
+                    mainLoop.ui().then(location => {
+                        dateWeather(location.location)
                     })
                     break;
                 }
@@ -82,6 +85,28 @@ const foreCastForCitiesInRange =(cities, weatherToSearch = []) => {
             })
             .catch(err => console.log(err))
     })
+}
+const dateWeather = (location, range=0) => {
+    weather.woeid_by_query(location)
+        .then(result => {
+            if (result.length === 0) {
+                console.log(`Sorry, there are no results in the MetaWeather API for ${location}.`)
+            }
+            else {
+                lattLong = result[0].latt_long.split(',')
+                weather.woeid_by_lattlong(lattLong[0], lattLong[1])
+                    .then(result => {
+                        getWeatherFilters()
+                            .then(filters => {
+                                getForecasts(location, [], filters.conditions)
+                            })
+                    })
+                    .catch(err => console.log(err))
+            }
+        })
+        .catch(err => {
+            console.log(err)
+        })
 }
 const surroundingCitiesWeather = (location) => {
     let
@@ -226,6 +251,7 @@ const getForecasts = (location, days, selections) => {
                     return 0
                 })
                 console.log(datesTable(dateArr).toString())
+                return menu_recur()
             }, 5000)
         })
 }
@@ -349,6 +375,11 @@ const filterSearch = (location, dateRange) => {
             getForecasts(location, days, filters.conditions)
         })
 
+}
+
+const print =(result)=>{
+    console.log( rangeSearch.table(result).toString())
+    return menu_recur()
 }
 
 module.exports = {
