@@ -16,6 +16,12 @@ const menu_recur = ()=>{
                     })
                     break;
                 }
+                case 'Date Range' : {
+                    mainLoop.ui().then(location => {
+                        dateRangeWeather(location.location)
+                    })
+                    break;
+                }
                 case 'Radius' :{
                     mainLoop.radius_submenu().then(result=>{
                         if (result.option === 'exit'){
@@ -86,28 +92,58 @@ const foreCastForCitiesInRange =(cities, weatherToSearch = []) => {
             .catch(err => console.log(err))
     })
 }
-const dateWeather = (location, range=0) => {
-    weather.woeid_by_query(location)
-        .then(result => {
-            if (result.length === 0) {
-                console.log(`Sorry, there are no results in the MetaWeather API for ${location}.`)
-            }
-            else {
-                lattLong = result[0].latt_long.split(',')
-                weather.woeid_by_lattlong(lattLong[0], lattLong[1])
-                    .then(result => {
-                        getWeatherFilters()
-                            .then(filters => {
-                                getForecasts(location, [], filters.conditions)
-                            })
-                    })
-                    .catch(err => console.log(err))
-            }
+
+//today and daterange start-------------------------------------------------------------------------------
+//note: validate start and end date
+const dateWeather = (location, startDate='', endDate='', range=0) => {
+    getWeatherFilters()
+        .then(filters => {
+            getForecasts(location, [], filters.conditions)
         })
-        .catch(err => {
+        .catch(err=> {
             console.log(err)
         })
 }
+
+const dateRangeWeather = (location) => {
+    startDate().then(start => {
+        endDate().then(end => {
+            filterSearch(location, [start.startDate, end.endDate])
+        })
+    })
+}
+const startDate = ()=> {
+    return inquirer.prompt([{
+        type:'input',
+        message:'Enter the start date:',
+        name:'startDate',
+        validate:(choices)=>{
+            if(choices>1 || choices<0){
+                return false;
+            }
+            else{
+                return true
+            }
+        }
+    }])
+}
+const endDate = ()=> {
+    return inquirer.prompt([{
+        type:'input',
+        message:'Enter the end date:',
+        name:'endDate',
+        validate:(choices)=>{
+            if(choices>1 || choices<0){
+                return false;
+            }
+            else{
+                return true
+            }
+        }
+    }])
+}
+//today and daterange end---------------------------------------------------------------------------------
+
 const surroundingCitiesWeather = (location) => {
     let
         lattLong = []
