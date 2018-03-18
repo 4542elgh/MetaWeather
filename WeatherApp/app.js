@@ -3,70 +3,71 @@ const
     colors = require('colors'),
     mainLoop = require('./mainLoop'),
     rangeSearch = require('./RangeSearch/rangeSearch'),
-    rangeSearch_inquirer = require('./RangeSearch/inquirer')
-    inquirer = require('inquirer') //temp <-- remove later
+    rangeSearch_inquirer = require('./RangeSearch/inquirer'),
+    inquirer = require('inquirer'), //temp <-- remove later
     Table = require('cli-table2')
 
-const menu_recur = ()=>{
-        mainLoop.menu().then(result=>{
-            switch(result.option){
-                case 'Today' : {
-                    mainLoop.ui().then(location => {
-                        dateWeather(location.location)
-                    })
-                    break;
-                }
-                case 'Date Range' : {
-                    mainLoop.ui().then(location => {
-                        dateRangeWeather(location.location)
-                    })
-                    break;
-                }
-                case 'Radius' :{
-                    mainLoop.radius_submenu().then(result=>{
-                        if (result.option === 'exit'){
-                            process.exit()
-                        }
-                        mainLoop.ui().then(location=>{
-                            if (result.option === 'Location + Radius'){
-                                surroundingCitiesWeather(location.location);
-                            }
-                            else {
-                                searchWeatherWithinRange(location.location)
-                            }
-                        })
-                    })
-                    break;
-                }
-                case 'history' : {
-                    mainLoop.ui().then(result=>{
-                      test.locationWeather_woeid(result.location);
-                      setTimeout(()=>{
-                          console.log(test.returnString());
-                          return menu_recur()}
-                          ,5000)
-                    })
-                    break;
-                }
-                case 'exit' : {
-                    process.exit(0)
-                    break;
-                }
+const menu_recur = () => {
+    mainLoop.menu().then(result => {
+        switch (result.option) {
+            case 'Today': {
+                mainLoop.ui().then(location => {
+                    dateWeather(location.location)
+                })
+                break;
             }
+            case 'Date Range': {
+                mainLoop.ui().then(location => {
+                    dateRangeWeather(location.location)
+                })
+                break;
+            }
+            case 'Radius': {
+                mainLoop.radius_submenu().then(result => {
+                    if (result.option === 'exit') {
+                        process.exit()
+                    }
+                    mainLoop.ui().then(location => {
+                        if (result.option === 'Location + Radius') {
+                            surroundingCitiesWeather(location.location);
+                        }
+                        else {
+                            searchWeatherWithinRange(location.location)
+                        }
+                    })
+                })
+                break;
+            }
+            case 'history': {
+                mainLoop.ui().then(result => {
+                    test.locationWeather_woeid(result.location);
+                    setTimeout(() => {
+                        console.log(test.returnString());
+                        return menu_recur()
+                    }
+                        , 5000)
+                })
+                break;
+            }
+            case 'exit': {
+                process.exit(0)
+                break;
+            }
+        }
     })
 }
 
 const selectRange = (result) => {
     rangeSearch_inquirer.selectRange_inquirer()
         .then((answers) => {
-            let withinRange = rangeSearch.selectRange(result,answers)
+            let withinRange = rangeSearch.selectRange(result, answers)
             foreCastForCitiesInRange(withinRange)
         })
 }
 
 
 //used an empty parameter here in order to reuse this function for another feature
-const foreCastForCitiesInRange =(cities, weatherToSearch = []) => {
+const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
     const citiesInfo = []
     cities.forEach(city => {
         //getting the weather info for each city in range using the WOEID(Where on Earth ID)
@@ -76,15 +77,15 @@ const foreCastForCitiesInRange =(cities, weatherToSearch = []) => {
             //Also we only want the forecasts of the day the query is made so the other days are of no cosequence
             .then(result => {
                 citiesInfo.push(
-                    rangeSearch.citiesInfo(result,city)
+                    rangeSearch.citiesInfo(result, city)
                 )
                 //reorganize the list of cities by distance in ascending order, 
                 //since our response might shuffle them.
-                if (cities.length === citiesInfo.length ) {
-                   if(weatherToSearch.length == 0) {
+                if (cities.length === citiesInfo.length) {
+                    if (weatherToSearch.length == 0) {
                         print(rangeSearch.sortResults(citiesInfo))
                     }
-                    else{
+                    else {
                         searchWeather(rangeSearch.sortResults(citiesInfo), weatherToSearch)
                     }
                 }
@@ -95,12 +96,12 @@ const foreCastForCitiesInRange =(cities, weatherToSearch = []) => {
 
 //today and daterange start-------------------------------------------------------------------------------
 //note: validate start and end date
-const dateWeather = (location, startDate='', endDate='', range=0) => {
+const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
     getWeatherFilters()
         .then(filters => {
             getForecasts(location, [], filters.conditions)
         })
-        .catch(err=> {
+        .catch(err => {
             console.log(err)
         })
 }
@@ -111,48 +112,48 @@ const dateRangeWeather = (location) => {
             let startDate = new Date(start.startDate)
             let endDate = new Date(end.endDate)
 
-            if(startDate.toString() === 'Invalid Date'
+            if (startDate.toString() === 'Invalid Date'
                 || endDate.toString() === 'Invalid Date') {
-                    console.log('Invalid start or end date. Returning to main menu.')
-                    return menu_recur()
-                }
+                console.log('Invalid start or end date. Returning to main menu.')
+                return menu_recur()
+            }
 
 
-            if(new Date(start.startDate) > new Date(end.endDate)) {
+            if (new Date(start.startDate) > new Date(end.endDate)) {
                 console.log('Error. Start date later than end date. Returning to main menu.')
                 return menu_recur()
             }
 
-            
+
             filterSearch(location, [start.startDate, end.endDate])
         })
     })
 }
-const startDate = ()=> {
+const startDate = () => {
     return inquirer.prompt([{
-        type:'input',
-        message:'Enter the start date:',
-        name:'startDate',
-        validate:(choices)=>{
-            if(choices>1 || choices<0){
+        type: 'input',
+        message: 'Enter the start date:',
+        name: 'startDate',
+        validate: (choices) => {
+            if (choices > 1 || choices < 0) {
                 return false;
             }
-            else{
+            else {
                 return true
             }
         }
     }])
 }
-const endDate = ()=> {
+const endDate = () => {
     return inquirer.prompt([{
-        type:'input',
-        message:'Enter the end date:',
-        name:'endDate',
-        validate:(choices)=>{
-            if(choices>1 || choices<0){
+        type: 'input',
+        message: 'Enter the end date:',
+        name: 'endDate',
+        validate: (choices) => {
+            if (choices > 1 || choices < 0) {
                 return false;
             }
-            else{
+            else {
                 return true
             }
         }
@@ -187,10 +188,10 @@ const selectWeather = (result) => {
         .then((answers) => {
             rangeSearch_inquirer.selectRange_inquirer()
                 .then((input) => {
-                    let obj = rangeSearch.selectWeather(result,answers,input)
-                    foreCastForCitiesInRange(obj.withinRange,obj.selectedWeather)
-            })
-    })
+                    let obj = rangeSearch.selectWeather(result, answers, input)
+                    foreCastForCitiesInRange(obj.withinRange, obj.selectedWeather)
+                })
+        })
 }
 
 const searchWeatherWithinRange = (location) => {
@@ -248,17 +249,19 @@ const filterForecast = (selections, response) => {
 // creates the array of dates
 const getDateRange = (dateRange) => {
     let response = []
-    if (dateRange !== null) {
-        let currentDate = new Date(dateRange[0])
+    let currentDate = new Date()
+
+    if ((dateRange !== null) && (dateRange <= currentDate) && (dateRange <= currentDate)) {
+        let startDate = new Date(dateRange[0])
         let endDate = new Date(dateRange[1])
 
-        while (currentDate <= endDate) {
+        while (startDate <= endDate) {
             response.push({
-                year: currentDate.getFullYear(),
-                month: currentDate.getMonth(),
-                day: currentDate.getDate()
+                year: startDate.getFullYear(),
+                month: startDate.getMonth(),
+                day: startDate.getDate()
             })
-            currentDate.setDate(currentDate.getDate() + 1)
+            startDate.setDate(startDate.getDate() + 1)
         }
     }
     return response
@@ -266,80 +269,85 @@ const getDateRange = (dateRange) => {
 
 // gets forecasts of location
 const getForecasts = (location, days, selections) => {
-    weather.woeid_by_query(location)
+    if ((location.trim() != '') && (location.length != 0)) {
+        weather.woeid_by_query(location)
 
-        .then(result => {
-            let date = new Date()
-            let dateStr = ''
-            let dateArr = []
+            .then(result => {
+                let date = new Date()
+                let dateStr = ''
+                let dateArr = []
 
-            //if location not found
-            if (result.length === 0) {
-                console.log(`No data for ${location}`)
-                return
-            }
+                //if location not found
+                if (result.length === 0) {
+                    console.log(`No data for ${location}`)
+                    return
+                }
 
-            //no date range specified
-            if (days.length === 0) {
-                dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
-                printForecast(weather.get_weather_by_woeid(result[0].woeid), selections, dateStr, dateArr)
-            }
+                //no date range specified
+                if (days.length === 0) {
+                    dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
+                    printForecast(weather.get_weather_by_woeid(result[0].woeid), selections, dateStr, dateArr)
+                }
 
-            days.forEach(day => {
-                dateStr = `${day.month + 1}-${day.day}-${day.year}`
-                printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid,
-                    day.year, day.month + 1, day.day), selections, dateStr, dateArr, 1)
-            })
-
-            //find a better interval
-            //currently this is a hack to allow for the printing of the date range or today's date
-            setTimeout(() => {
-                dateArr.sort((a, b) => {
-                    let A = new Date(a.date),
-                        B = new Date(b.date)
-
-                    if(A < B) return -1
-                    if(A > B) return 1
-                    return 0
+                days.forEach(day => {
+                    dateStr = `${day.month + 1}-${day.day}-${day.year}`
+                    printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid,
+                        day.year, day.month + 1, day.day), selections, dateStr, dateArr, 1)
                 })
-                console.log(datesTable(dateArr).toString())
-                return menu_recur()
-            }, 5000)
-        })
+
+                //find a better interval
+                //currently this is a hack to allow for the printing of the date range or today's date
+                setTimeout(() => {
+                    dateArr.sort((a, b) => {
+                        let A = new Date(a.date),
+                            B = new Date(b.date)
+
+                        if (A < B) return -1
+                        if (A > B) return 1
+                        return 0
+                    })
+                    console.log(datesTable(dateArr).toString())
+                    return menu_recur()
+                }, 5000)
+            })
+    }
+    return menu_recur()
 }
 
 //note: write a better for key in object
 const datesTable = (info) => {
-    let headers = [{content: 'DATE'.cyan.bold, hAlign:'center'}]
+    let headers = [{ content: 'DATE'.cyan.bold, hAlign: 'center' }]
     let temp = info[0].output
     let row = []
     let data
 
-    for(let key in temp) {
-        if(temp.hasOwnProperty(key)) {
-            headers.push({content: key.toUpperCase().cyan.bold, hAlign:'center'})
+    for (let key in temp) {
+        if (temp.hasOwnProperty(key)) {
+            headers.push({ content: key.toUpperCase().cyan.bold, hAlign: 'center' })
         }
     }
 
     let table = new Table({
-        chars: { 'top': '═'.magenta , 'top-mid': '╤'.magenta , 'top-left': '╔'.magenta , 'top-right': '╗'.magenta
-            , 'bottom': '═'.magenta , 'bottom-mid': '╧'.magenta , 'bottom-left': '╚'.magenta , 'bottom-right': '╝'.magenta
-            , 'left': '║'.magenta , 'left-mid': '╟'.magenta , 'mid': '─'.magenta , 'mid-mid': '┼'.magenta
-            , 'right': '║'.magenta , 'right-mid': '╢'.magenta , 'middle': '│'.magenta },
+        chars: {
+            'top': '═'.magenta, 'top-mid': '╤'.magenta, 'top-left': '╔'.magenta, 'top-right': '╗'.magenta
+            , 'bottom': '═'.magenta, 'bottom-mid': '╧'.magenta, 'bottom-left': '╚'.magenta, 'bottom-right': '╝'.magenta
+            , 'left': '║'.magenta, 'left-mid': '╟'.magenta, 'mid': '─'.magenta, 'mid-mid': '┼'.magenta
+            , 'right': '║'.magenta, 'right-mid': '╢'.magenta, 'middle': '│'.magenta
+        },
 
         head: headers
     });
 
     info.forEach(element => {
         row = []
-        row.push({content: element.date, hAlign:'center'})
+        row.push({ content: element.date, hAlign: 'center' })
         temp = element.output
-        for(let key in temp) {
-            if(temp.hasOwnProperty(key)) {
+        for (let key in temp) {
+            if (temp.hasOwnProperty(key)) {
                 data = temp[key]
             }
-            row.push({content: data, hAlign:'center'})
-        }    
+            row.push({ content: data, hAlign: 'center' })
+        }
         table.push(row)
     })
     return table;
@@ -372,6 +380,7 @@ const formatForecast = (dateStr, filteredForecast) => {
     return table
 }
 
+// TODO: print the location's for Today's forecast with the search query
 const printForecast = (response, selections, dateStr, dateArr, range = 0) => {
     let forecastCopy
     let output
@@ -429,8 +438,8 @@ const filterSearch = (location, dateRange) => {
 
 }
 
-const print =(result)=>{
-    console.log( rangeSearch.table(result).toString())
+const print = (result) => {
+    console.log(rangeSearch.table(result).toString())
     return menu_recur()
 }
 
