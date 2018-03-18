@@ -353,33 +353,6 @@ const datesTable = (info) => {
     return table;
 }
 
-// formats print
-const formatForecast = (dateStr, filteredForecast) => {
-    let table = new Table({ style: { head: [], border: [] } })
-    table.push([{
-        colSpan: 2, content: `${dateStr}`
-    }])
-    for (let key in filteredForecast) {
-        if (filteredForecast.hasOwnProperty(key)) {
-            if (typeof filteredForecast[key] === 'object') {
-                for (let key2 in filteredForecast[key]) {
-                    if (filteredForecast[key].hasOwnProperty(key2)) {
-                        table.push([
-                            `${key2}`, `${filteredForecast[key][key2]}`
-                        ])
-                    }
-                }
-            }
-            else {
-                table.push([
-                    `${key}`, `${filteredForecast[key]}`
-                ])
-            }
-        }
-    }
-    return table
-}
-
 // TODO: print the location's for Today's forecast with the search query
 const printForecast = (response, selections, dateStr, dateArr, range = 0) => {
     let forecastCopy
@@ -394,7 +367,6 @@ const printForecast = (response, selections, dateStr, dateArr, range = 0) => {
         }
 
         let filteredForecast = filterForecast(selections, forecastCopy)
-        // console.log(formatForecast(dateStr, filteredForecast).toString())
 
         dateArr.push({
             date: dateStr,
