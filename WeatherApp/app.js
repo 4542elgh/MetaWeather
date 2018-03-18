@@ -141,17 +141,7 @@ const datesTable = (info) => {
         temp = element.output
         for(let key in temp) {
             if(temp.hasOwnProperty(key)) {
-                if (typeof temp[key] === 'object') {
-                    for (let key2 in temp[key]) {
-                        if (temp[key].hasOwnProperty(key2)) {
-                            data = temp[key][key2]
-                        }
-                    }
-                }
-                else {
-                    data = temp[key]
-                    // row.push(temp[key])
-                }
+                data = temp[key]
             }
             row.push({content: data, hAlign:'center'})
         }    
