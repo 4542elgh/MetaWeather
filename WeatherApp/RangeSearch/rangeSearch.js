@@ -35,6 +35,7 @@ const citiesInfo = (result,city)=>{
         minTemp: utilities.CtoF(result.consolidated_weather[0].min_temp) + '°F' ,
         maxTemp: utilities.CtoF(result.consolidated_weather[0].max_temp) + '°F',
         humidity: result.consolidated_weather[0].humidity + '%',
+        wind: result.consolidated_weather[0].wind_speed.toPrecision(2) +"mph " + result.consolidated_weather[0].wind_direction_compass,
         air_pressure:result.consolidated_weather[0].air_pressure.toPrecision(4) + ' mb'
     }
 }
@@ -95,10 +96,10 @@ const table = (result)=>{
             , 'left': '║'.magenta , 'left-mid': '╟'.magenta , 'mid': '─'.magenta , 'mid-mid': '┼'.magenta
             , 'right': '║'.magenta , 'right-mid': '╢'.magenta , 'middle': '│'.magenta },
 
-        head: ['CITY'.cyan.bold, 'DISTANCE'.cyan.bold, 'CONDITIONS'.cyan.bold,'TEMPERATURE'.cyan.bold,'LOW'.cyan.bold,'HIGH'.cyan.bold,'HUMIDITY'.cyan.bold,'AIR PRESSURE'.cyan.bold ]
+        head: ['CITY'.cyan.bold, 'DISTANCE'.cyan.bold, 'CONDITION'.cyan.bold,'TEMPERATURE'.cyan.bold,'LOW'.cyan.bold,'HIGH'.cyan.bold,'HUMIDITY'.cyan.bold,'WIND'.cyan.bold, 'AIR PRESSURE'.cyan.bold ]
     });
     result.forEach(city =>{
-        table.push([city.cityName.white, city.distance.white, city.conditions.white,city.temperature.white,city.minTemp.white, city.maxTemp.white, city.humidity.white, city.air_pressure.white])
+        table.push([city.cityName.white, city.distance.white, city.conditions.white,city.temperature.white,city.minTemp.white, city.maxTemp.white, city.humidity.white,city.wind.white, city.air_pressure.white])
     })
     return table;
 }
