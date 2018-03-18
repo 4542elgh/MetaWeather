@@ -1,7 +1,8 @@
 const
     weather = require('../MetaWeatherAPI/index')
-inquirer = require('inquirer')
-Table = require('cli-table2')
+    inquirer = require('inquirer')
+    Table = require('cli-table2')
+    colors = require('colors')
 
 const locationWeather = (location) => {
     weather.woeid_by_query(location)
@@ -29,28 +30,19 @@ const filterForecast = (selections, response) => {
     for (let i = 0; i < selections.length; i++) {
         switch (selections[i]) {
             case 'forecast':
-                filteredForecast['forecast'] = response.weather_state_name
+                filteredForecast['condition'] = response.weather_state_name
                 break;
             case 'temperature':
-                let temperature = {
-                    'high': celsiusToFahrenheit(response.min_temp),
-                    'low': celsiusToFahrenheit(response.max_temp),
-                }
-                filteredForecast['temperature'] = temperature
+                filteredForecast['temperature'] = celsiusToFahrenheit(response.the_temp) + '°F'
+                filteredForecast['low'] = celsiusToFahrenheit(response.min_temp) + '°F'
+                filteredForecast['high'] = celsiusToFahrenheit(response.max_temp) + '°F'
                 break;
             case 'air':
-                let air = {
-                    'humidity': response.humidity.toString() + '%',
-                    'air_pressure': Math.round(response.air_pressure).toString() + ' mb'
-                }
-                filteredForecast['air'] = air
+                filteredForecast['humidity'] = response.humidity.toString() + '%'
+                filteredForecast['air pressure'] = Math.round(response.air_pressure).toString() + ' mb'
                 break;
             case 'wind':
-                let wind = {
-                    'wind_speed': Math.round(response.wind_speed).toString() + ' mph',
-                    'wind_dir': Math.round(response.wind_direction).toString() + '°'
-                }
-                filteredForecast['wind'] = wind
+                filteredForecast['wind'] = Math.round(response.wind_speed).toString() + ' mph ' + response.wind_direction_compass
                 break;
             case 'exit':
                 return
@@ -116,11 +108,56 @@ const getForecasts = (location, days, selections) => {
                     if(A > B) return 1
                     return 0
                 })
-                dateArr.forEach(index => {
-                    console.log(index.output)
-                })
+                console.log(datesTable(dateArr).toString())
             }, 5000)
         })
+}
+
+//note: write a better for key in object
+const datesTable = (info) => {
+    let headers = [{content: 'DATE'.cyan.bold, hAlign:'center'}]
+    let temp = info[0].output
+    let row = []
+    let data
+
+    for(let key in temp) {
+        if(temp.hasOwnProperty(key)) {
+            headers.push({content: key.toUpperCase().cyan.bold, hAlign:'center'})
+        }
+    }
+
+    let table = new Table({
+        chars: { 'top': '═'.magenta , 'top-mid': '╤'.magenta , 'top-left': '╔'.magenta , 'top-right': '╗'.magenta
+            , 'bottom': '═'.magenta , 'bottom-mid': '╧'.magenta , 'bottom-left': '╚'.magenta , 'bottom-right': '╝'.magenta
+            , 'left': '║'.magenta , 'left-mid': '╟'.magenta , 'mid': '─'.magenta , 'mid-mid': '┼'.magenta
+            , 'right': '║'.magenta , 'right-mid': '╢'.magenta , 'middle': '│'.magenta },
+
+        head: headers
+    });
+
+    info.forEach(element => {
+        row = []
+        row.push({content: element.date, hAlign:'center'})
+        temp = element.output
+        for(let key in temp) {
+            if(temp.hasOwnProperty(key)) {
+                if (typeof temp[key] === 'object') {
+                    for (let key2 in temp[key]) {
+                        if (temp[key].hasOwnProperty(key2)) {
+                            data = temp[key][key2]
+                        }
+                    }
+                }
+                else {
+                    data = temp[key]
+                    // row.push(temp[key])
+                }
+            }
+            row.push({content: data, hAlign:'center'})
+        }    
+        table.push(row)
+    })
+    return table;
 }
 
 // formats print
@@ -167,7 +204,7 @@ const printForecast = (response, selections, dateStr, dateArr, range = 0) => {
 
         dateArr.push({
             date: dateStr,
-            output: formatForecast(dateStr, filteredForecast).toString()
+            output: filteredForecast
         })
     }).catch(err => {
         console.log(err)
