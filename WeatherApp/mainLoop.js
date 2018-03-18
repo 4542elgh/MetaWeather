@@ -6,11 +6,15 @@ const ui = ()=>{
         message:'Enter your location:',
         name:'location',
         validate:(choices)=>{
-            if(choices>1 || choices<0){
+            if(choices.length==0 || choices<0){
                 return false;
             }
             else{
+                if (choices.replace(/ /g,'') == 0){
+                    return false
+                }else{
                 return true
+                }
             }
         }
     }])
