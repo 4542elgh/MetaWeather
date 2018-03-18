@@ -142,6 +142,7 @@ const searchWeather = (cities, weather)=>{
 
     if(result.length === 0){
         console.log('Sorry there are no results for the miles and weather condition specified.')
+        return menu_recur()
     }
     else{
         print(result)
