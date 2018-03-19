@@ -28,11 +28,11 @@ const menu_recur = ()=>{
                         process.exit()
                     }
                     mainLoop.ui().then(location=>{
-                        if (result.option === 'Location + Radius'){
-                            searchWeatherWithinRange(location.location)
+                        if (result.option === 'location + radius'){
+                            surroundingCitiesWeather(location.location);
                         }
                         else {
-                            surroundingCitiesWeather(location.location);
+                            searchWeatherWithinRange(location.location)
                         }
                     })
                 })
