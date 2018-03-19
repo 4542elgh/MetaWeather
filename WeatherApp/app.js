@@ -65,6 +65,16 @@ const selectRange = (result) => {
         })
 }
 
+const searchWeather = (cities, weather)=>{
+    let result = rangeSearch.searchWeather(cities,weather)
+
+    if(result.length === 0){
+        console.log('Sorry there are no results for the miles and weather condition specified.')
+    }
+    else{
+        print(result)
+    }
+}
 
 //used an empty parameter here in order to reuse this function for another feature
 const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
@@ -86,7 +96,7 @@ const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
                         print(rangeSearch.sortResults(citiesInfo))
                     }
                     else {
-                        rangeSearch.searchWeather(rangeSearch.sortResults(citiesInfo), weatherToSearch)
+                        searchWeather(rangeSearch.sortResults(citiesInfo), weatherToSearch)
                     }
                 }
             })
