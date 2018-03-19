@@ -42,7 +42,7 @@ const radius_submenu = ()=>{
         type:'list',
         message:'Menu:',
         name:'option',
-        choices:[new inquirer.Separator('---Search By Radius---'),'location + radius','location + weather condition + radius',new inquirer.Separator('-----------'),'exit'],
+        choices:[new inquirer.Separator('---Search By Radius---'),'location + radius','location + weather condition + radius',new inquirer.Separator('-----------'),'return to menu'],
         validate:(choices)=>{
             if(choices>1 || choices<0){
                 return false;

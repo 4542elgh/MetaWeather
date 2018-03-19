@@ -24,8 +24,8 @@ const menu_recur = ()=>{
             }
             case 'radius' :{
                 mainLoop.radius_submenu().then(result=>{
-                    if (result.option === 'exit'){
-                        process.exit()
+                    if (result.option === 'return to menu'){
+                        return menu_recur()
                     }
                     mainLoop.ui().then(location=>{
                         if (result.option === 'location + radius'){

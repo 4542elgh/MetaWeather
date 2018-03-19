@@ -8,14 +8,11 @@ const selectRange_inquirer = ()=>{
         choices: ['50 miles', '100 miles', '150 miles', '200 miles', '250 miles', '300 miles', '350 miles'],
         validate: (answer) => {
             if (answer.length > 1 || answer.length === 0) {
-
                 return 'Error: You must select 1 choice only'
-
             } else {
                 return true
             }
         }
-
     }])
 }
 
@@ -27,9 +24,7 @@ const selectWeather_inquirer = ()=> {
         choices: ['Clear', 'Light Cloud', 'Heavy Cloud', 'Showers', 'Light Rain', 'Heavy Rain', 'Thunderstorm', 'Hail', 'Sleet', 'Snow'],
         validate: (answer) => {
             if (answer.length > 0) {
-
                 return true
-
             } else {
                 return 'Error: You must select at least one choice'
             }
