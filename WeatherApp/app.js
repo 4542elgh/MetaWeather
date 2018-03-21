@@ -13,44 +13,45 @@ const
 
 
 var
-    mainLoopChoice = 'test',
+    mainLoopChoice = '',
     radiusChoice = '',
-    dateWeatherLocation = '',
+    globalLocation = '',
     dateWeatherStartDate = '',
     dateWeatherEndDate = '',
     dateWeatherRange = '',
-    dateRangeWeatherLocation = '',
     dateRangeWeatherStart = '',
     dateRangeWeatherEnd = '',
-    surroundingCitiesWeatherLocation = '',
-    searchWeatherWithinRangeLocation = '',
     array = [{
         mainLoopChoice: mainLoopChoice,
         radiusChoice: radiusChoice,
-        dateWeatherLocation: dateWeatherLocation,
+        globalLocation: globalLocation,
         dateWeatherStartDate: dateWeatherStartDate,
         dateWeatherEndDate: dateWeatherEndDate,
         dateWeatherRange: dateWeatherRange,
-        dateRangeWeatherLocation: dateRangeWeatherLocation,
         dateRangeWeatherStart: dateRangeWeatherStart,
         dateRangeWeatherEnd: dateRangeWeatherEnd,
-        surroundingCitiesWeatherLocation: surroundingCitiesWeatherLocation,
-        searchWeatherWithinRangeLocation: searchWeatherWithinRangeLocation
     }];
 
 const menu_recur = () => {
+
+
+
     mainLoop.menu().then(result => {
+
         switch (result.option) {
             case 'today': {
                 mainLoop.ui().then(location => {
                     dateWeather(location.location, 0)
+                    //pushArray();
                 })
                 mainLoopChoice = 'today';
+
                 break;
             }
             case 'date range': {
                 mainLoop.ui().then(location => {
                     dateRangeWeather(location.location)
+
                 })
                 mainLoopChoice = 'date range';
                 break;
@@ -64,10 +65,12 @@ const menu_recur = () => {
                         if (result.option === 'location + radius') {
                             radiusChoice = 'location + radius';
                             surroundingCitiesWeather(location.location);
+
                         }
                         else if (result.option === 'location + weather conditions + radius') {
                             radiusChoice = 'location + weather conditions + radius';
                             searchWeatherWithinRange(location.location)
+
                         }
                     })
                 })
@@ -75,31 +78,41 @@ const menu_recur = () => {
                 break;
             }
             case 'history': {
+                console.log(array)
+
                 if (mainLoopChoice == 'today') {
-                    console.log('History For: ' + mainLoopChoice + ' Location: ' + dateWeatherLocation);
-                    dateWeather(dateWeatherLocation, 0)
+                    console.log('History For: ' + mainLoopChoice + ' Location: ' + globalLocation);
+                    dateWeather(globalLocation, 0)
                     break;
                 }
                 else if (mainLoopChoice == 'date range') {
-                    console.log('History For: ' + mainLoopChoice + ' Location: ' + dateRangeWeatherLocation);
-                    filterSearch(dateRangeWeatherLocation, [dateRangeWeatherStart, dateRangeWeatherEnd]);
+
+                    if (array[x].mainLoopChoice == 'date range') {
+
+                        console.log('History For: ' + mainLoopChoice + ' Location: ' + globalLocation);
+                        filterSearch(globalLocation, [dateRangeWeatherStart, dateRangeWeatherEnd]);
+                    }
+
+                    // console.log('History For: ' + mainLoopChoice + ' Location: ' + globalLocation);
+                    // filterSearch(globalLocation, [dateRangeWeatherStart, dateRangeWeatherEnd]);
                     break;
                 }
                 else if (mainLoopChoice == 'radius') {
                     console.log('History For: ' + mainLoopChoice);
                     if (radiusChoice == 'location + radius') {
-                        console.log('Location: ' + surroundingCitiesWeatherLocation);
+                        console.log('Location: ' + globalLocation);
                         radiusChoice = 'location + radius';
-                        surroundingCitiesWeather(surroundingCitiesWeatherLocation);
+                        surroundingCitiesWeather(globalLocation);
                     }
                     else if (radiusChoice == 'location + weather conditions + radius') {
-                        console.log('Location: ' + searchWeatherWithinRangeLocation);
+                        console.log('Location: ' + globalLocation);
                         radiusChoice = 'location + weather conditions + radius';
-                        searchWeatherWithinRange(searchWeatherWithinRangeLocation);
+                        searchWeatherWithinRange(globalLocation);
                     }
                     break;
                 }
                 return menu_recur()
+
 
             }
             case 'exit': {
@@ -107,6 +120,7 @@ const menu_recur = () => {
                 break;
             }
         }
+
     })
 }
 
@@ -160,7 +174,7 @@ const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
 //today and daterange start-------------------------------------------------------------------------------
 //note: validate start and end date
 const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
-    dateWeatherLocation = location;
+    globalLocation = location;
     dateWeatherStartDate = startDate;
     dateWeatherEndDate = endDate;
     dateWeatherRange = range;
@@ -178,9 +192,10 @@ const dateRangeWeather = (location) => {
         search_inquirer.endDate_inquirer().then(end => {
             let startDate = new Date(start.startDate)
             let endDate = new Date(end.endDate)
-            dateRangeWeatherLocation = location;
+            globalLocation = location;
             dateRangeWeatherStart = start.startDate;
             dateRangeWeatherEnd = end.endDate;
+            // pushArray();
             if (startDate.toString() === 'Invalid Date'
                 || endDate.toString() === 'Invalid Date') {
                 console.log('Invalid start or end date. Returning to main menu.')
@@ -199,7 +214,8 @@ const dateRangeWeather = (location) => {
 //today and daterange end---------------------------------------------------------------------------------
 
 const surroundingCitiesWeather = (location) => {
-    surroundingCitiesWeatherLocation = location;
+    globalLocation = location;
+    //pushArray();
     let
         lattLong = []
     weather.woeid_by_query(location)
@@ -234,7 +250,8 @@ const selectWeather = (result) => {
 }
 
 const searchWeatherWithinRange = (location) => {
-    searchWeatherWithinRangeLocation = location;
+    globalLocation = location;
+    pushArray();
     let
         lattLong = []
 
@@ -408,32 +425,20 @@ const history = (array) => {
     })
 }
 
-const inquirerDisplay = (choices) => {
-    let choice = [];
+const pushArray = () => {
+    if (array.length > 6) {
+        array.splice(1, 1)
 
-    if (choices[0] == 'Back to Main Menu') {
-        choice = ['Back to Main Menu']
     }
-    else {
-        //fetch so top is most recent
-        choices.forEach((item, index) => {
-            choice[choices.length - 1 - index] = item.title
-        })
-    }
-
-    return inquirer.prompt({
-        type: 'list',
-        message: 'Select History',
-        name: 'location',
-        choices: choice,
-        validate: (choice) => {
-            if (choices > 1 || choices < 0) {
-                return false;
-            }
-            else {
-                return true
-            }
-        }
+    array.push({
+        mainLoopChoice: mainLoopChoice,
+        radiusChoice: radiusChoice,
+        globalLocation: globalLocation,
+        dateWeatherStartDate: dateWeatherStartDate,
+        dateWeatherEndDate: dateWeatherEndDate,
+        dateWeatherRange: dateWeatherRange,
+        dateRangeWeatherStart: dateRangeWeatherStart,
+        dateRangeWeatherEnd: dateRangeWeatherEnd
     })
 }
 
