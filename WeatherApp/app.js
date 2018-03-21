@@ -4,9 +4,10 @@ const
     mainLoop = require('./mainLoop'),
     rangeSearch = require('./RangeSearch/rangeSearch'),
     rangeSearch_inquirer = require('./RangeSearch/inquirer'),
-    inquirer = require('inquirer'),
+    search = require('./Search/search'),
+    search_inquirer = require('./Search/inquirer'),
     Table = require('cli-table2'),
-    utilities = require('./utils/utilities')
+    inquirer = require('inquirer'), //temp <-- remove later
 
 const menu_recur = ()=>{
     mainLoop.menu().then(result=>{
@@ -68,7 +69,6 @@ const selectRange = (result) => {
 
 const searchWeather = (cities, weather)=>{
     let result = rangeSearch.searchWeather(cities,weather)
-
     if(result.length === 0){
         console.log('Sorry there are no results for the miles and weather condition specified.')
         return menu_recur()
@@ -109,7 +109,7 @@ const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
 //today and daterange start-------------------------------------------------------------------------------
 //note: validate start and end date
 const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
-    getWeatherFilters()
+    search_inquirer.getWeatherFilters()
         .then(filters => {
             getForecasts(location, [], filters.conditions)
         })
@@ -119,8 +119,8 @@ const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
 }
 
 const dateRangeWeather = (location) => {
-    startDate().then(start => {
-        endDate().then(end => {
+    search_inquirer.startDate_inquirer().then(start => {
+        search_inquirer.endDate_inquirer().then(end => {
             let startDate = new Date(start.startDate)
             let endDate = new Date(end.endDate)
 
@@ -130,47 +130,16 @@ const dateRangeWeather = (location) => {
                 return menu_recur()
             }
 
-
             if (new Date(start.startDate) > new Date(end.endDate)) {
                 console.log('Error. Start date later than end date. Returning to main menu.')
                 return menu_recur()
             }
 
-
             filterSearch(location, [start.startDate, end.endDate])
         })
     })
 }
-const startDate = () => {
-    return inquirer.prompt([{
-        type: 'input',
-        message: 'Enter the start date:',
-        name: 'startDate',
-        validate: (choices) => {
-            if (choices > 1 || choices < 0) {
-                return false;
-            }
-            else {
-                return true
-            }
-        }
-    }])
-}
-const endDate = () => {
-    return inquirer.prompt([{
-        type: 'input',
-        message: 'Enter the end date:',
-        name: 'endDate',
-        validate: (choices) => {
-            if (choices > 1 || choices < 0) {
-                return false;
-            }
-            else {
-                return true
-            }
-        }
-    }])
-}
+
 //today and daterange end---------------------------------------------------------------------------------
 
 const surroundingCitiesWeather = (location) => {
@@ -259,25 +228,6 @@ const filterForecast = (selections, response) => {
 }
 
 // creates the array of dates
-const getDateRange = (dateRange) => {
-    let response = []
-    let currentDate = new Date()
-    let startDate = new Date(dateRange[0])
-    let endDate = new Date(dateRange[1])
-
-    if ((dateRange !== null) && (startDate <= currentDate) && (endDate <= currentDate)) {
-
-        while (startDate <= endDate) {
-            response.push({
-                year: startDate.getFullYear(),
-                month: startDate.getMonth(),
-                day: startDate.getDate()
-            })
-            startDate.setDate(startDate.getDate() + 1)
-        }
-    }
-    return response
-}
 
 // gets forecasts of location
 const getForecasts = (location, days, selections) => {
@@ -436,36 +386,13 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, range 
 
 }
 
-// gives inquirer prompt with all filters
-const getWeatherFilters = () => {
-    let conditions = ['forecast', 'temperature', 'air', 'wind', 'exit']
-
-    return inquirer.prompt([{
-        type: 'checkbox',
-        message: 'Select the conditions to display:\n',
-        name: 'conditions',
-        choices: conditions,
-        validate: (filters) => {
-            if (filters.length > 1 && filters.indexOf('exit') > -1) {
-                return 'Only select exit to return to main menu'
-            }
-            if (filters.length != 0) {
-                return true
-            }
-            return 'Not a valid selection'
-        }
-    }])
-}
-
 // wrapper for search
 const filterSearch = (location, dateRange) => {
-    let days = getDateRange(dateRange)
-
-    getWeatherFilters()
+    let days = search.getDateRange(dateRange)
+    search_inquirer.getWeatherFilters()
         .then(filters => {
             getForecasts(location, days, filters.conditions)
         })
-
 }
 
 const print = (result) => {
