@@ -30,14 +30,26 @@ const filterForecast = (selections, response) => {
 }
 
 const datesTable = (info) => {
-    let headers = [{ content: 'DATE'.cyan.bold, hAlign: 'center' }]
+    let tableHeaders = []
+
+    if (info.length > 1) { 
+        tableHeaders = [
+            {content: 'DATE'.cyan.bold, hAlign: 'center'}
+        ]}
+    else if (info.length === 1) {
+        tableHeaders = [
+            {content: 'DATE'.cyan.bold, hAlign: 'center'},
+            {content: 'LOCATION'.cyan.bold, hAlign: 'center'}
+        ]}
+    
+    // obj output contains weather forecast response object
     let temp = info[0].output
     let row = []
     let data
 
     for (let key in temp) {
         if (temp.hasOwnProperty(key)) {
-            headers.push({ content: key.toUpperCase().cyan.bold, hAlign: 'center' })
+            tableHeaders.push({ content: key.toUpperCase().cyan.bold, hAlign: 'center' })
         }
     }
 
@@ -49,21 +61,42 @@ const datesTable = (info) => {
             , 'right': '║'.magenta, 'right-mid': '╢'.magenta, 'middle': '│'.magenta
         },
 
-        head: headers
+        head: tableHeaders
     });
 
-    info.forEach(element => {
-        row = []
-        row.push({ content: element.date, hAlign: 'center' })
-        temp = element.output
-        for (let key in temp) {
-            if (temp.hasOwnProperty(key)) {
-                data = temp[key]
+
+    if (info.length > 1) {
+        info.forEach(element => {
+            row = []
+            row.push({ content: element.date, hAlign: 'center' })
+            // temp iterate thru each forecast of all the dates
+            temp = element.output
+            for (let key in temp) {
+                if (temp.hasOwnProperty(key)) {
+                    data = temp[key]
+                }
+                row.push({ content: data, hAlign: 'center' })
             }
-            row.push({ content: data, hAlign: 'center' })
-        }
-        table.push(row)
-    })
+            table.push(row)
+        })
+    }
+    else if (info.length === 1) {
+        info.forEach(element => {
+            row = []
+            row.push({ content: element.date, hAlign: 'center' })
+            row.push({ content: element.location, hAlign: 'center' })
+            // temp iterate thru each forecast of all the dates
+            temp = element.output
+            for (let key in temp) {
+                if (temp.hasOwnProperty(key)) {
+                    data = temp[key]
+                }
+                row.push({ content: data, hAlign: 'center' })
+            }
+            table.push(row)
+        })
+    }
+    
     return table;
 }
 

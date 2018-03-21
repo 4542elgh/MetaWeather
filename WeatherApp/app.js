@@ -6,10 +6,9 @@ const
     rangeSearch_inquirer = require('./RangeSearch/inquirer'),
     search = require('./Search/search'),
     search_inquirer = require('./Search/inquirer'),
-    Table = require('cli-table2'),
-    inquirer = require('inquirer'), //temp <-- remove later
+    Table = require('cli-table2')
 
-const menu_recur = ()=>{
+const menu_recur = () => {
     mainLoop.menu().then(result=>{
         switch(result.option){
             case 'today' : {
@@ -200,35 +199,6 @@ const searchWeatherWithinRange = (location) => {
         .catch(err => console.log(err))
 }
 
-const filterForecast = (selections, response) => {
-    let filteredForecast = {}
-
-    for (let i = 0; i < selections.length; i++) {
-        switch (selections[i]) {
-            case 'forecast':
-                filteredForecast['condition'] = response.weather_state_name
-                break;
-            case 'temperature':
-                filteredForecast['temperature'] = utilities.CtoF(response.the_temp) + '°F'
-                filteredForecast['low'] = utilities.CtoF(response.min_temp) + '°F'
-                filteredForecast['high'] = utilities.CtoF(response.max_temp) + '°F'
-                break;
-            case 'air':
-                filteredForecast['humidity'] = response.humidity.toString() + '%'
-                filteredForecast['air pressure'] = Math.round(response.air_pressure).toString() + ' mb'
-                break;
-            case 'wind':
-                filteredForecast['wind'] = Math.round(response.wind_speed).toString() + ' mph ' + response.wind_direction_compass
-                break;
-            case 'exit':
-                return
-        }
-    }
-    return filteredForecast
-}
-
-// creates the array of dates
-
 // gets forecasts of location
 const getForecasts = (location, days, selections) => {
     if ((location.trim() != '') && (location.length != 0)) {
@@ -269,7 +239,7 @@ const getForecasts = (location, days, selections) => {
                             if (A > B) return 1
                             return 0
                         })
-                        console.log(datesTable(datesWithForecasts).toString())
+                        console.log(search.datesTable(datesWithForecasts).toString())
                         return menu_recur()
                     }, 
                     5000)
@@ -279,77 +249,6 @@ const getForecasts = (location, days, selections) => {
         console.log('Invalid location. Returning to main menu.')
         return menu_recur()
     }
-}
-
-const datesTable = (info) => {
-    let tableHeaders = []
-
-    if (info.length > 1) { 
-        tableHeaders = [
-            {content: 'DATE'.cyan.bold, hAlign: 'center'}
-        ]}
-    else if (info.length === 1) {
-        tableHeaders = [
-            {content: 'DATE'.cyan.bold, hAlign: 'center'},
-            {content: 'LOCATION'.cyan.bold, hAlign: 'center'}
-        ]}
-    
-    // obj output contains weather forecast response object
-    let temp = info[0].output
-    let row = []
-    let data
-
-    for (let key in temp) {
-        if (temp.hasOwnProperty(key)) {
-            tableHeaders.push({ content: key.toUpperCase().cyan.bold, hAlign: 'center' })
-        }
-    }
-
-    let table = new Table({
-        chars: {
-            'top': '═'.magenta, 'top-mid': '╤'.magenta, 'top-left': '╔'.magenta, 'top-right': '╗'.magenta
-            , 'bottom': '═'.magenta, 'bottom-mid': '╧'.magenta, 'bottom-left': '╚'.magenta, 'bottom-right': '╝'.magenta
-            , 'left': '║'.magenta, 'left-mid': '╟'.magenta, 'mid': '─'.magenta, 'mid-mid': '┼'.magenta
-            , 'right': '║'.magenta, 'right-mid': '╢'.magenta, 'middle': '│'.magenta
-        },
-
-        head: tableHeaders
-    });
-
-
-    if (info.length > 1) {
-        info.forEach(element => {
-            row = []
-            row.push({ content: element.date, hAlign: 'center' })
-            // temp iterate thru each forecast of all the dates
-            temp = element.output
-            for (let key in temp) {
-                if (temp.hasOwnProperty(key)) {
-                    data = temp[key]
-                }
-                row.push({ content: data, hAlign: 'center' })
-            }
-            table.push(row)
-        })
-    }
-    else if (info.length === 1) {
-        info.forEach(element => {
-            row = []
-            row.push({ content: element.date, hAlign: 'center' })
-            row.push({ content: element.location, hAlign: 'center' })
-            // temp iterate thru each forecast of all the dates
-            temp = element.output
-            for (let key in temp) {
-                if (temp.hasOwnProperty(key)) {
-                    data = temp[key]
-                }
-                row.push({ content: data, hAlign: 'center' })
-            }
-            table.push(row)
-        })
-    }
-    
-    return table;
 }
 
 // TODO: print all locations with search query string in Today's
@@ -365,7 +264,7 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, range 
         else {
             tempForecast = forecasts[0]
         }
-        let filteredForecast = filterForecast(selections, tempForecast)
+        let filteredForecast = search.filterForecast(selections, tempForecast)
 
         if (!range) {
             datesWithForecasts.push({
