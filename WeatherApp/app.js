@@ -12,7 +12,7 @@ const
     fs = require('fs')
 
 // creating variables to store in history feature
-let
+var
     mainLoopChoice = '',
     radiusChoice = '',
     globalLocation = '',
@@ -37,7 +37,6 @@ let
 const menu_recur = () => {
 
     mainLoop.menu().then(result => {
-
         switch (result.option) {
             case 'today': {
                 mainLoop.ui().then(location => {
@@ -51,7 +50,6 @@ const menu_recur = () => {
             case 'date range': {
                 mainLoop.ui().then(location => {
                     dateRangeWeather(location.location)
-
                 })
                 mainLoopChoice = 'date range';
                 break;
