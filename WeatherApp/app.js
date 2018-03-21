@@ -29,7 +29,7 @@ var
         dateWeatherEndDate: dateWeatherEndDate,
         dateWeatherRange: dateWeatherRange,
         dateRangeWeatherStart: dateRangeWeatherStart,
-        dateRangeWeatherEnd: dateRangeWeatherEnd,
+        dateRangeWeatherEnd: dateRangeWeatherEnd
     }];
 
 const menu_recur = () => {
