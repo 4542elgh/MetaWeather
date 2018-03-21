@@ -11,8 +11,8 @@ const
     filename = 'weatherSearchHistory.json',
     fs = require('fs')
 
-
-var
+// creating variables to store in history feature
+let
     mainLoopChoice = '',
     radiusChoice = '',
     globalLocation = '',
@@ -21,6 +21,7 @@ var
     dateWeatherRange = '',
     dateRangeWeatherStart = '',
     dateRangeWeatherEnd = '',
+
     array = [{
         mainLoopChoice: mainLoopChoice,
         radiusChoice: radiusChoice,
@@ -29,12 +30,11 @@ var
         dateWeatherEndDate: dateWeatherEndDate,
         dateWeatherRange: dateWeatherRange,
         dateRangeWeatherStart: dateRangeWeatherStart,
-        dateRangeWeatherEnd: dateRangeWeatherEnd,
+        dateRangeWeatherEnd: dateRangeWeatherEnd
     }];
 
+// menu io loop
 const menu_recur = () => {
-
-
 
     mainLoop.menu().then(result => {
 
@@ -113,7 +113,6 @@ const menu_recur = () => {
                 }
                 return menu_recur()
 
-
             }
             case 'exit': {
                 process.exit(0)
@@ -172,7 +171,7 @@ const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
 }
 
 //today and daterange start-------------------------------------------------------------------------------
-//note: validate start and end date
+
 const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
     globalLocation = location;
     dateWeatherStartDate = startDate;
@@ -236,6 +235,7 @@ const surroundingCitiesWeather = (location) => {
         })
         .catch(err => console.log(err))
 }
+
 //----------------Search by Weather and Range Starts Here-----------------
 
 const selectWeather = (result) => {
@@ -252,8 +252,7 @@ const selectWeather = (result) => {
 const searchWeatherWithinRange = (location) => {
     globalLocation = location;
     pushArray();
-    let
-        lattLong = []
+    let lattLong = []
 
     weather.woeid_by_query(location)
         .then(result => {
@@ -302,7 +301,6 @@ const getForecasts = (location, days, selections) => {
                         day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, true)
                 })
 
-                //find a better interval
                 //currently this is a hack to allow for the printing of the date range or today's date
                     setTimeout(() => {
                         // custom sort to check if dateA is earlier than dateB
@@ -373,6 +371,8 @@ const print = (result) => {
     console.log(rangeSearch.table(result).toString())
     return menu_recur()
 }
+
+//----------------History Starts Here-----------------
 
 const history = (array) => {
     console.log("test")
