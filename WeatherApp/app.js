@@ -4,8 +4,9 @@ const
     mainLoop = require('./mainLoop'),
     rangeSearch = require('./RangeSearch/rangeSearch'),
     rangeSearch_inquirer = require('./RangeSearch/inquirer'),
-    inquirer = require('inquirer'), //temp <-- remove later
-    Table = require('cli-table2')
+    inquirer = require('inquirer'),
+    Table = require('cli-table2'),
+    utilities = require('./utils/utilities')
 
 const menu_recur = ()=>{
     mainLoop.menu().then(result=>{
@@ -230,10 +231,6 @@ const searchWeatherWithinRange = (location) => {
         .catch(err => console.log(err))
 }
 
-const celsiusToFahrenheit = (degree) => {
-    return Math.round(degree * 1.8 + 32)
-}
-
 const filterForecast = (selections, response) => {
     let filteredForecast = {}
 
@@ -243,9 +240,9 @@ const filterForecast = (selections, response) => {
                 filteredForecast['condition'] = response.weather_state_name
                 break;
             case 'temperature':
-                filteredForecast['temperature'] = celsiusToFahrenheit(response.the_temp) + '°F'
-                filteredForecast['low'] = celsiusToFahrenheit(response.min_temp) + '°F'
-                filteredForecast['high'] = celsiusToFahrenheit(response.max_temp) + '°F'
+                filteredForecast['temperature'] = utilities.CtoF(response.the_temp) + '°F'
+                filteredForecast['low'] = utilities.CtoF(response.min_temp) + '°F'
+                filteredForecast['high'] = utilities.CtoF(response.max_temp) + '°F'
                 break;
             case 'air':
                 filteredForecast['humidity'] = response.humidity.toString() + '%'
@@ -290,7 +287,7 @@ const getForecasts = (location, days, selections) => {
             .then(result => {
                 let date = new Date()
                 let dateStr = ''
-                let dateArr = []
+                let datesWithForecasts = []
 
                 //if location not found
                 if (result.length === 0) {
@@ -301,29 +298,31 @@ const getForecasts = (location, days, selections) => {
                 //no date range specified
                 if (days.length === 0) {
                     dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
-                    printForecast(weather.get_weather_by_woeid(result[0].woeid), selections, dateStr, dateArr)
+                    printForecast(weather.get_weather_by_woeid(result[0].woeid), selections, dateStr, datesWithForecasts)
                 }
 
                 days.forEach(day => {
                     dateStr = `${day.month + 1}-${day.day}-${day.year}`
                     printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid,
-                        day.year, day.month + 1, day.day), selections, dateStr, dateArr, 1)
+                        day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, true)
                 })
 
                 //find a better interval
                 //currently this is a hack to allow for the printing of the date range or today's date
-                setTimeout(() => {
-                    dateArr.sort((a, b) => {
-                        let A = new Date(a.date),
-                            B = new Date(b.date)
+                    setTimeout(() => {
+                        // custom sort to check if dateA is earlier than dateB
+                        datesWithForecasts.sort((a, b) => {
+                            let A = new Date(a.date),
+                                B = new Date(b.date)
 
-                        if (A < B) return -1
-                        if (A > B) return 1
-                        return 0
-                    })
-                    console.log(datesTable(dateArr).toString())
-                    return menu_recur()
-                }, 5000)
+                            if (A < B) return -1
+                            if (A > B) return 1
+                            return 0
+                        })
+                        console.log(datesTable(datesWithForecasts).toString())
+                        return menu_recur()
+                    }, 
+                    5000)
             })
     }
     else {
@@ -332,16 +331,27 @@ const getForecasts = (location, days, selections) => {
     }
 }
 
-//note: write a better for key in object
 const datesTable = (info) => {
-    let headers = [{ content: 'DATE'.cyan.bold, hAlign: 'center' }]
+    let tableHeaders = []
+
+    if (info.length > 1) { 
+        tableHeaders = [
+            {content: 'DATE'.cyan.bold, hAlign: 'center'}
+        ]}
+    else if (info.length === 1) {
+        tableHeaders = [
+            {content: 'DATE'.cyan.bold, hAlign: 'center'},
+            {content: 'LOCATION'.cyan.bold, hAlign: 'center'}
+        ]}
+    
+    // obj output contains weather forecast response object
     let temp = info[0].output
     let row = []
     let data
 
     for (let key in temp) {
         if (temp.hasOwnProperty(key)) {
-            headers.push({ content: key.toUpperCase().cyan.bold, hAlign: 'center' })
+            tableHeaders.push({ content: key.toUpperCase().cyan.bold, hAlign: 'center' })
         }
     }
 
@@ -353,43 +363,73 @@ const datesTable = (info) => {
             , 'right': '║'.magenta, 'right-mid': '╢'.magenta, 'middle': '│'.magenta
         },
 
-        head: headers
+        head: tableHeaders
     });
 
-    info.forEach(element => {
-        row = []
-        row.push({ content: element.date, hAlign: 'center' })
-        temp = element.output
-        for (let key in temp) {
-            if (temp.hasOwnProperty(key)) {
-                data = temp[key]
+
+    if (info.length > 1) {
+        info.forEach(element => {
+            row = []
+            row.push({ content: element.date, hAlign: 'center' })
+            // temp iterate thru each forecast of all the dates
+            temp = element.output
+            for (let key in temp) {
+                if (temp.hasOwnProperty(key)) {
+                    data = temp[key]
+                }
+                row.push({ content: data, hAlign: 'center' })
             }
-            row.push({ content: data, hAlign: 'center' })
-        }
-        table.push(row)
-    })
+            table.push(row)
+        })
+    }
+    else if (info.length === 1) {
+        info.forEach(element => {
+            row = []
+            row.push({ content: element.date, hAlign: 'center' })
+            row.push({ content: element.location, hAlign: 'center' })
+            // temp iterate thru each forecast of all the dates
+            temp = element.output
+            for (let key in temp) {
+                if (temp.hasOwnProperty(key)) {
+                    data = temp[key]
+                }
+                row.push({ content: data, hAlign: 'center' })
+            }
+            table.push(row)
+        })
+    }
+    
     return table;
 }
 
-// TODO: print the location's for Today's forecast with the search query
-const printForecast = (response, selections, dateStr, dateArr, range = 0) => {
-    let forecastCopy
+// TODO: print all locations with search query string in Today's
+const printForecast = (response, selections, dateStr, datesWithForecasts, range = false) => {
+    let tempForecast
     let output
 
     response.then(forecasts => {
-        if (range === 0) {
-            forecastCopy = forecasts.consolidated_weather[0]
+        // range: ranges of dates, true
+        if (!range) {
+            tempForecast = forecasts.consolidated_weather[0]
         }
         else {
-            forecastCopy = forecasts[0]
+            tempForecast = forecasts[0]
         }
+        let filteredForecast = filterForecast(selections, tempForecast)
 
-        let filteredForecast = filterForecast(selections, forecastCopy)
-
-        dateArr.push({
-            date: dateStr,
-            output: filteredForecast
-        })
+        if (!range) {
+            datesWithForecasts.push({
+                date: dateStr,
+                location: forecasts.title,
+                output: filteredForecast
+            })
+        }
+        else {
+            datesWithForecasts.push({
+                date: dateStr,
+                output: filteredForecast
+            })
+        }
     }).catch(err => {
         console.log(err)
     })
