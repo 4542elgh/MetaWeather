@@ -25,6 +25,14 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
         }
     })
     .command({
+        command:'dateWeather <location>',
+        desc: 'return weather for specific location',
+        alias: 'dw',
+        handler: (argv) => {
+            app.dateWeather(argv.location,0)
+        }
+    })
+    .command({
         command:'searchDistance <location>',
         desc: 'return surrounding cities and forecasts within the radius from the location',
         alias: 'sd',

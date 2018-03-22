@@ -6,6 +6,7 @@ const
     rangeSearch_inquirer = require('./RangeSearch/inquirer'),
     search = require('./Search/search'),
     search_inquirer = require('./Search/inquirer'),
+    history_inquirer = require('./History/inquirer')
     inquirer = require('inquirer'), //temp <-- remove later
     Table = require('cli-table2'),
     filename = 'weatherSearchHistory.json',
@@ -35,40 +36,7 @@ var
     }],
     cliStrings = []
 
-const history_inquirer = () => {
-    let choice = [];
-    array.forEach((item, index) => {
-        if (index == 0) { }
-        else {
-            if (item.mainLoopChoice == 'today') {
-                choice.push(`${item.mainLoopChoice} ==> ${item.globalLocation}`)
-            }
-            else if (item.mainLoopChoice == 'date range') {
-                choice.push(`${item.mainLoopChoice} ==> ${item.globalLocation} ==> ${item.dateRangeWeatherStart} ==> ${item.dateRangeWeatherEnd}`)
-            }
-            else if (item.mainLoopChoice == 'radius') {
-                choice.push(`${item.mainLoopChoice} ==> ${item.radiusChoice} ==> ${item.globalLocation}`)
-            }
 
-        }
-    })
-
-    choice.push('return to menu')
-    return inquirer.prompt([{
-        type: 'list',
-        message: 'Select the range in miles to search',
-        name: 'option',
-        // choices: ['50 miles', '100 miles', '150 miles', '200 miles', '250 miles', '300 miles', '350 miles'],
-        choices: choice,
-        validate: (answer) => {
-            if (answer.length > 1 || answer.length === 0) {
-                return 'Error: You must select 1 choice only'
-            } else {
-                return true
-            }
-        }
-    }])
-}
 // menu io loop
 const menu_recur = () => {
     
@@ -119,7 +87,7 @@ const menu_recur = () => {
                     return menu_recur()
                 }
 
-                history_inquirer().then(result => {
+                history_inquirer.history_inquirer(array).then(result => {
                     if (result.option == 'return to menu'){
                         return menu_recur()
                     }
@@ -131,13 +99,16 @@ const menu_recur = () => {
                     }
                     else if (param[0] == 'radius') {
                         if (param[1] == 'location + weather condition + radius') {
+                            console.log(`node cli searchWeatherAndDistance ${param[2]}`)
                             searchWeatherWithinRange(param[2]);
                         }
                         else {
+                            console.log(`node cli searchDistance ${param[2]}`)
                             surroundingCitiesWeather(param[2]);
                         }
                     }
                     else if (param[0] == 'date range') {
+                        console.log(`node cli filterSearch ${param[1]} [${param[2]},${param[3]}]`)
                         filterSearch(param[1], [param[2], param[3]])
                     }
                 })
@@ -522,6 +493,7 @@ const printCliArray = () => {
 
 
 module.exports = {
+    dateWeather,
     menu_recur,
     searchWeatherWithinRange,
     surroundingCitiesWeather,
