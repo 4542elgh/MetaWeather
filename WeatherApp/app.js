@@ -201,8 +201,8 @@ const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
     dateWeatherRange = range;
     //cli output
     //console.log('node cli.js search "' + globalLocation + '"');
-    cliArray('node cli search "' + globalLocation + '"');
-    search_inquirer.getWeatherFilters()
+    cliArray('node cli.js search "' + globalLocation + '"');
+    search_inquirer.getWeatherFilters(cliFlag)
         .then(filters => {
             if (filters.conditions.toString() === 'return to menu') {
                 return (cliFlag) ? null : menu_recur()
@@ -333,13 +333,14 @@ const getForecasts = (location, days, selections) => {
                 //no date range specified
                 if (days.length === 0) {
                     dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
-                    printForecast(weather.get_weather_by_woeid(result[0].woeid), selections, dateStr, datesWithForecasts)
+                    printForecast(weather.get_weather_by_woeid(result[0].woeid), 
+                        selections, dateStr, datesWithForecasts, result[0].title)
                 }
 
                 days.forEach(day => {
                     dateStr = `${day.month + 1}-${day.day}-${day.year}`
                     printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid,
-                        day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, true)
+                        day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, result[0].title, true)
                 })
 
                 //currently this is a hack to allow for the printing of the date range or today's date
@@ -366,7 +367,7 @@ const getForecasts = (location, days, selections) => {
 }
 
 // TODO: print all locations with searched string in Today's
-const printForecast = (response, selections, dateStr, datesWithForecasts, range = false) => {
+const printForecast = (response, selections, dateStr, datesWithForecasts, location, range = false) => {
     let tempForecast
     let output
 
@@ -380,19 +381,11 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, range 
         }
         let filteredForecast = search.filterForecast(selections, tempForecast)
 
-        if (!range) {
-            datesWithForecasts.push({
-                date: dateStr,
-                location: forecasts.title,
-                output: filteredForecast
-            })
-        }
-        else {
-            datesWithForecasts.push({
-                date: dateStr,
-                output: filteredForecast
-            })
-        }
+        datesWithForecasts.push({
+            date: dateStr,
+            location: location,
+            output: filteredForecast
+        })
     }).catch(err => {
         console.log(err)
     })
@@ -403,9 +396,10 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, range 
 const filterSearch = (location, dateRange, cli = false) => {
     cliFlag = cli
     let days = search.getDateRange(dateRange)
-    search_inquirer.getWeatherFilters()
+    search_inquirer.getWeatherFilters(cliFlag)
         .then(filters => {
-            if (filters.conditions.toString() === 'return to menu') {
+            let exitName = (cliFlag) ? 'exit' : 'return to menu'
+            if(filters.conditions.toString() === exitName) {
                 return (cliFlag) ? null : menu_recur()
             }
             getForecasts(location, days, filters.conditions)

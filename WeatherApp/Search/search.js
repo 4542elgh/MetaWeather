@@ -1,6 +1,7 @@
 const
     utilities = require('../utils/utilities'),
-    Table = require('cli-table2')
+    Table = require('cli-table2'),
+    colors = require('colors')
 
 const filterForecast = (selections, response) => {
     let filteredForecast = {}
@@ -32,7 +33,18 @@ const filterForecast = (selections, response) => {
 const datesTable = (info) => {
     let tableHeaders = []
 
+    let table = new Table({
+        chars: {
+            'top': '═'.magenta, 'top-mid': '╤'.magenta, 'top-left': '╔'.magenta, 'top-right': '╗'.magenta
+            , 'bottom': '═'.magenta, 'bottom-mid': '╧'.magenta, 'bottom-left': '╚'.magenta, 'bottom-right': '╝'.magenta
+            , 'left': '║'.magenta, 'left-mid': '╟'.magenta, 'mid': '─'.magenta, 'mid-mid': '┼'.magenta
+            , 'right': '║'.magenta, 'right-mid': '╢'.magenta, 'middle': '│'.magenta
+        }
+    });
+
     if (info.length > 1) { 
+        let colSpan = Object.keys(info[0].output).length + 1 //number of filtered keys + date
+        table.push([{colSpan: colSpan, content: 'LOCATION'.cyan.bold + ': ' + info[0].location, hAlign: 'center'}])
         tableHeaders = [
             {content: 'DATE'.cyan.bold, hAlign: 'center'}
         ]}
@@ -53,17 +65,7 @@ const datesTable = (info) => {
         }
     }
 
-    let table = new Table({
-        chars: {
-            'top': '═'.magenta, 'top-mid': '╤'.magenta, 'top-left': '╔'.magenta, 'top-right': '╗'.magenta
-            , 'bottom': '═'.magenta, 'bottom-mid': '╧'.magenta, 'bottom-left': '╚'.magenta, 'bottom-right': '╝'.magenta
-            , 'left': '║'.magenta, 'left-mid': '╟'.magenta, 'mid': '─'.magenta, 'mid-mid': '┼'.magenta
-            , 'right': '║'.magenta, 'right-mid': '╢'.magenta, 'middle': '│'.magenta
-        },
-
-        head: tableHeaders
-    });
-
+    table.push(tableHeaders)
 
     if (info.length > 1) {
         info.forEach(element => {
@@ -110,7 +112,7 @@ const getDateRange = (dateRange) => {
 
         while (startDate <= endDate) {
             if(response.length > 6) { //short-circuit if the user input a range larger than 7 days
-                console.log('Range input greater than one week. Only the results up to one week will display.')
+                console.log( colors.cyan('Range input is sgreater than one week. Only the results up to one week will display.') )
                 return response
             }
 
