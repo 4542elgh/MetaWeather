@@ -4,28 +4,33 @@ Based on MetaWeather api: [https://www.metaweather.com/api/](https://www.metawea
 
 ### Required Modules:
 * superagent 
-   - Making ajax request and store the response into promise
+   - To make AJAX request and store the response into promise
 * yargs
-   - Command line Gui-like utilities for building custom commands
+   - To create custom commands in CLI
+* inquirer
+   - To prompt users for selections
+* colors
+   - To color the table and some text
+* cli-table2
+   - To print table
 
 ### This app should be able to get weather by:
-* pass in a city's name
-   - Select from a list of possible locations
-* pass in latitude and longitude
-   - Select Location based on distance from such latitude and longitude
-* pass in a location and a date
-   - To view past, current or maximum 10 days forcast of weather
+* location (if applicable by MetaWeather)
+   - return today's forecast of the given location
+* location and date range
+   - return the forecasts of the given date range and location
+* radius
+   - return all locations with its forecasts within the given radius
+* radius and weather condition(s)
+   - return all location with its forecasts within the given radius and satify weather condition(s)
 
 ### Other Attributes
-* table view of the results
-* cli search by location
-    - Return filtered weather condition or return all conditions
-* cli history
-    - Return the most recent five searches
-    - Allow users to select which location to view from the history
-* date range of forecasts by location
-    - Given these dates, return the forecasts of this location
-* cli help
-    - Display a list of the commands with its descriptions
-* cli IO loop
-    - Exit IO loop by selection
+* provide a table view of the results
+* provide an IO-Gui experience for users
+   - users can select the searches and history
+* display history
+   - keep track of users' commands
+   - allow users to select which commands to execute from the history
+   - return the most recent five searches
+* provide help menu in CLI
+   - return a help menu of commands and its descriptions
