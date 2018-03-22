@@ -53,8 +53,12 @@ const endDate_inquirer = () => {
     }])
 }
 
-const getWeatherFilters = () => {
-    let conditions = ['forecast', 'temperature', 'air', 'wind', 'return to menu']
+const getWeatherFilters = (cliFlag) => {    
+    let conditions = ['forecast', 'temperature', 'air', 'wind']
+
+    //if called from the cli: exit, otherwise return to menu
+    let exitName = (cliFlag) ? 'exit' : 'return to menu'
+    conditions.push(exitName)
 
     return inquirer.prompt([{
         type: 'checkbox',
@@ -62,7 +66,7 @@ const getWeatherFilters = () => {
         name: 'conditions',
         choices: conditions,
         validate: (filters) => {
-            if (filters.length > 1 && filters.indexOf('exit') > -1) {
+            if (filters.length > 1 && filters.indexOf(exitName) > -1) {
                 return 'Only select exit to return to main menu'
             }
             if (filters.length != 0) {
