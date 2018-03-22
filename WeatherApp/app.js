@@ -133,7 +133,7 @@ const selectRange = (result) => {
 const searchWeather = (cities, weather) => {
     let result = rangeSearch.searchWeather(cities, weather)
     if (result.length === 0) {
-        console.log( colors.blue('Sorry there are no results for the miles and weather condition specified.') )
+        console.log( colors.blue('There are no results for the miles and weather condition specified.') )
         return (cliFlag) ? null : menu_recur()
     }
     else {
@@ -224,7 +224,7 @@ const surroundingCitiesWeather = (location, cli = false) => {
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
             if (result.length === 0) {
-                console.log( colors.blue(`Sorry, there are no results in the MetaWeather API for ${location}.`) )
+                console.log( colors.blue(`There are no results for ${location}.`) )
                 return (cliFlag) ? null : menu_recur()
             }
             else {
@@ -262,7 +262,7 @@ const searchWeatherWithinRange = (location, cli = false) => {
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
             if (result.length === 0) {
-                console.log( colors.blue(`Sorry, there are no results in the MetaWeather API for ${location}.`) )
+                console.log( colors.blue(`There are no results for ${location}.`) )
                 return (cliFlag) ? null : menu_recur()
             }
             else {
