@@ -33,7 +33,7 @@ const endDate_inquirer = () => {
 }
 
 const getWeatherFilters = () => {
-    let conditions = ['forecast', 'temperature', 'air', 'wind', 'exit']
+    let conditions = ['forecast', 'temperature', 'air', 'wind', 'return to menu']
 
     return inquirer.prompt([{
         type: 'checkbox',
@@ -47,7 +47,7 @@ const getWeatherFilters = () => {
             if (filters.length != 0) {
                 return true
             }
-            return 'Not a valid selection'
+            return 'Please make a selection.'
         }
     }])
 }
