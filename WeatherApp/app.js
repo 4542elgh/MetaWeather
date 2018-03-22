@@ -52,6 +52,8 @@ const history_inquirer = () => {
 
         }
     })
+
+    choice.push('return to menu')
     return inquirer.prompt([{
         type: 'list',
         message: 'Select the range in miles to search',
@@ -111,7 +113,17 @@ const menu_recur = () => {
             }
             case 'history': {
                 //console.log(array)
+
+                if (array.length == 1){
+                    console.log('Search History is empty');
+                    return menu_recur()
+                }
+
                 history_inquirer().then(result => {
+                    if (result.option == 'return to menu'){
+                        return menu_recur()
+                    }
+
                     let param = result.option.split(' ==> ');
                     if (param[0] == 'today') {
                         console.log(`node cli dateWeather -l ${param[1]}`)
@@ -129,7 +141,6 @@ const menu_recur = () => {
                         filterSearch(param[1], [param[2], param[3]])
                     }
                 })
-
                 break;
             }
 
@@ -477,23 +488,21 @@ const pushArray = () => {
     if (array.length > 6) {
         array.splice(1, 1)
     }
-
-    //if mainLoopChoice and globalLocation not the same, push to array
-    for (x = 0; x < array.length; x++) {
-        if (mainLoopChoice != array[x].mainLoopChoice && globalLocation != array[x].globalLocation) {
-            array.push({
-                mainLoopChoice: mainLoopChoice,
-                radiusChoice: radiusChoice,
-                globalLocation: globalLocation,
-                dateWeatherStartDate: dateWeatherStartDate,
-                dateWeatherEndDate: dateWeatherEndDate,
-                dateWeatherRange: dateWeatherRange,
-                dateRangeWeatherStart: dateRangeWeatherStart,
-                dateRangeWeatherEnd: dateRangeWeatherEnd
-            })
-            break;
+    for (z = 0; z < array.length; z++) {
+        if (mainLoopChoice == array[z].mainLoopChoice && globalLocation == array[z].globalLocation){
+            return
         }
-    }
+     }
+    array.push({
+        mainLoopChoice: mainLoopChoice,
+        radiusChoice: radiusChoice,
+        globalLocation: globalLocation,
+        dateWeatherStartDate: dateWeatherStartDate,
+        dateWeatherEndDate: dateWeatherEndDate,
+        dateWeatherRange: dateWeatherRange,
+        dateRangeWeatherStart: dateRangeWeatherStart,
+        dateRangeWeatherEnd: dateRangeWeatherEnd
+    })
 
 }
 
