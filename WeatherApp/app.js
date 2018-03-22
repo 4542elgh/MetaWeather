@@ -180,7 +180,7 @@ const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
     //cli output
     //console.log('node cli.js search "' + globalLocation + '"');
     cliArray('node cli.js search "' + globalLocation + '"');
-    search_inquirer.getWeatherFilters()
+    search_inquirer.getWeatherFilters(cliFlag)
         .then(filters => {
             if(filters.conditions.toString() === 'return to menu') {
                 return (cliFlag) ? null : menu_recur()
@@ -374,9 +374,10 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, locati
 const filterSearch = (location, dateRange, cli = false) => {
     cliFlag = cli
     let days = search.getDateRange(dateRange)
-    search_inquirer.getWeatherFilters()
+    search_inquirer.getWeatherFilters(cliFlag)
         .then(filters => {
-            if(filters.conditions.toString() === 'return to menu') {
+            let exitName = (cliFlag) ? 'exit' : 'return to menu'
+            if(filters.conditions.toString() === exitName) {
                 return (cliFlag) ? null : menu_recur()
             }
             getForecasts(location, days, filters.conditions)
