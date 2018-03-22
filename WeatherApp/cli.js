@@ -5,7 +5,7 @@ const
 const flags = yargs.usage('$0: Usage <cmd> [options]')
     .command({
         command:'menu',
-        desc: 'enter IO Loop to search for the weather',
+        desc: 'enter IO Loop, the AIO weather search',
         handler: () => {
             app.menu_recur()
         }

@@ -133,7 +133,7 @@ const selectRange = (result) => {
 const searchWeather = (cities, weather) => {
     let result = rangeSearch.searchWeather(cities, weather)
     if (result.length === 0) {
-        console.log('Sorry there are no results for the miles and weather condition specified.')
+        console.log( colors.blue('Sorry there are no results for the miles and weather condition specified.') )
         return (cliFlag) ? null : menu_recur()
     }
     else {
@@ -199,12 +199,12 @@ const dateRangeWeather = (location) => {
             // pushArray();
             if (startDate.toString() === 'Invalid Date'
                 || endDate.toString() === 'Invalid Date') {
-                console.log('Invalid start or end date. Returning to main menu.')
+                console.log( colors.blue('Invalid start or end date. Returning to main menu.') )
                 return (cliFlag) ? null : menu_recur()
             }
 
             if (new Date(start.startDate) > new Date(end.endDate)) {
-                console.log('Error. Start date later than end date. Returning to main menu.')
+                console.log( colors.blue('Error. Start date later than end date. Returning to main menu.') )
                 return (cliFlag) ? null : menu_recur()
             }
             filterSearch(location, [start.startDate, end.endDate])
@@ -224,7 +224,7 @@ const surroundingCitiesWeather = (location, cli = false) => {
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
             if (result.length === 0) {
-                console.log(`Sorry, there are no results in the MetaWeather API for ${location}.`)
+                console.log( colors.blue(`Sorry, there are no results in the MetaWeather API for ${location}.`) )
                 return (cliFlag) ? null : menu_recur()
             }
             else {
@@ -262,7 +262,7 @@ const searchWeatherWithinRange = (location, cli = false) => {
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
             if (result.length === 0) {
-                console.log(`Sorry, there are no results in the MetaWeather API for ${location}.`)
+                console.log( colors.blue(`Sorry, there are no results in the MetaWeather API for ${location}.`) )
                 return (cliFlag) ? null : menu_recur()
             }
             else {
@@ -324,7 +324,7 @@ const getForecasts = (location, days, selections) => {
             })
     }
     else {
-        console.log('Invalid location. Returning to main menu.')
+        console.log( colors.blue('Invalid location. Returning to main menu.') )
         return (cliFlag) ? null : menu_recur()
     }
 }
@@ -384,7 +384,7 @@ const print = (result) => {
 //----------------History Starts Here-----------------
 
 const history = (array) => {
-    console.log("test")
+
     fs.open(filename, 'r', (err, fd) => {
 
         //create file if it doesn't already exist
@@ -393,8 +393,8 @@ const history = (array) => {
                 if (err) {
                     console.log(err);
                 }
-                console.log("Search history file not found. Search history file has been created.");
-                console.log("Seach results saved: " + array.length + " of 5.");
+                console.log( colors.blue("Search history file not found. Search history file has been created.") );
+                console.log( colors.blue("Seach results saved: " + array.length + " of 5.") );
             });
         }
 
@@ -428,7 +428,7 @@ const history = (array) => {
 
                 //write updated array to file
                 fs.writeFile(filename, JSON.stringify(historyDataArray), (err) => {
-                    console.log("Seach results saved: " + historyDataArray.length + " of 5.");
+                    console.log( colors.blue("Seach results saved: " + historyDataArray.length + " of 5.") );
                     if (err) {
                         console.log(err);
                     }
