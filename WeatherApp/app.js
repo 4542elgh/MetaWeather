@@ -83,7 +83,7 @@ const menu_recur = () => {
                 //console.log(array)
 
                 if (array.length == 1){
-                    console.log('Search History is empty');
+                    console.log( colors.cyan('Search History is empty') );
                     return menu_recur()
                 }
 
