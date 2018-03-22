@@ -156,7 +156,7 @@ const selectRange = (result) => {
 const searchWeather = (cities, weather) => {
     let result = rangeSearch.searchWeather(cities, weather)
     if (result.length === 0) {
-        console.log( colors.blue('There are no results for the miles and weather condition specified.') )
+        console.log( colors.cyan('There are no results for the miles and weather condition specified.') )
         return (cliFlag) ? null : menu_recur()
     }
     else {
@@ -228,12 +228,12 @@ const dateRangeWeather = (location) => {
             pushArray();
             if (startDate.toString() === 'Invalid Date'
                 || endDate.toString() === 'Invalid Date') {
-                console.log( colors.blue('Invalid start or end date. Returning to main menu.') )
+                console.log( colors.cyan('Invalid start or end date. Returning to main menu.') )
                 return (cliFlag) ? null : menu_recur()
             }
 
             if (new Date(start.startDate) > new Date(end.endDate)) {
-                console.log( colors.blue('Error. Start date later than end date. Returning to main menu.') )
+                console.log( colors.cyan('Error. Start date later than end date. Returning to main menu.') )
                 return (cliFlag) ? null : menu_recur()
             }
             filterSearch(location, [start.startDate, end.endDate])
@@ -256,7 +256,7 @@ const surroundingCitiesWeather = (location, cli = false) => {
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
             if (result.length === 0) {
-                console.log( colors.blue(`There are no results for ${location}.`) )
+                console.log( colors.cyan(`There are no results for ${location}.`) )
                 return (cliFlag) ? null : menu_recur()
             }
             else {
@@ -298,7 +298,7 @@ const searchWeatherWithinRange = (location, cli = false) => {
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
             if (result.length === 0) {
-                console.log( colors.blue(`There are no results for ${location}.`) )
+                console.log( colors.cyan(`There are no results for ${location}.`) )
                 return (cliFlag) ? null : menu_recur()
             }
             else {
@@ -325,7 +325,7 @@ const getForecasts = (location, days, selections) => {
 
                 //no data for searched location
                 if (result.length === 0) {
-                    console.log( colors.blue(`No data for ${location}`) )
+                    console.log(colors.cyan(`There are no results for ${location}.`) )
                     // fixed bug: return to menu when no data for location is found
                     return (cliFlag) ? null : menu_recur()
                 }
@@ -360,7 +360,7 @@ const getForecasts = (location, days, selections) => {
             })
     }
     else {
-        console.log( colors.blue('Invalid location. Returning to main menu.') )
+        console.log(colors.cyan('There are no results for ${location}.`') )
         return (cliFlag) ? null : menu_recur()
     }
 }
@@ -429,8 +429,8 @@ const history = (array) => {
                 if (err) {
                     console.log(err);
                 }
-                console.log( colors.blue("Search history file not found. Search history file has been created.") );
-                console.log( colors.blue("Seach results saved: " + array.length + " of 5.") );
+                console.log( colors.cyan("Search history file not found. Search history file has been created.") );
+                console.log( colors.cyan("Seach results saved: " + array.length + " of 5.") );
             });
         }
 
@@ -464,7 +464,7 @@ const history = (array) => {
 
                 //write updated array to file
                 fs.writeFile(filename, JSON.stringify(historyDataArray), (err) => {
-                    console.log( colors.blue("Seach results saved: " + historyDataArray.length + " of 5.") );
+                    console.log( colors.cyan("Seach results saved: " + historyDataArray.length + " of 5.") );
                     if (err) {
                         console.log(err);
                     }

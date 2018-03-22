@@ -1,6 +1,7 @@
 const
     app = require('./app'),
-    yargs = require('yargs')
+    yargs = require('yargs'),
+    colors = require('colors')
 
 const flags = yargs.usage('$0: Usage <cmd> [options]')
     .command({
@@ -60,7 +61,7 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
                 app.filterSearch(argv.location, argv.dateRange, true)
             }
             else {
-                console.log('Unable to execute command. Date range input was invalid')
+                console.log( colors.cyan('Unable to execute command. Date range input was invalid') )
             }
         }
     })
