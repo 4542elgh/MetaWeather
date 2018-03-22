@@ -6,6 +6,7 @@ const
     rangeSearch_inquirer = require('./RangeSearch/inquirer'),
     search = require('./Search/search'),
     search_inquirer = require('./Search/inquirer'),
+    history_inquirer = require('./History/inquirer')
     inquirer = require('inquirer'), //temp <-- remove later
     Table = require('cli-table2'),
     filename = 'weatherSearchHistory.json',
@@ -35,38 +36,7 @@ var
     }],
     cliStrings = []
 
-const history_inquirer = () => {
-    let choice = [];
-    array.forEach((item, index) => {
-        if (index == 0) { }
-        else {
-            if (item.mainLoopChoice == 'today') {
-                choice.push(`${item.mainLoopChoice} ==> ${item.globalLocation}`)
-            }
-            else if (item.mainLoopChoice == 'date range') {
-                choice.push(`${item.mainLoopChoice} ==> ${item.globalLocation} ==> ${item.dateRangeWeatherStart} ==> ${item.dateRangeWeatherEnd}`)
-            }
-            else if (item.mainLoopChoice == 'radius') {
-                choice.push(`${item.mainLoopChoice} ==> ${item.radiusChoice} ==> ${item.globalLocation}`)
-            }
 
-        }
-    })
-    return inquirer.prompt([{
-        type: 'list',
-        message: 'Select the range in miles to search',
-        name: 'option',
-        // choices: ['50 miles', '100 miles', '150 miles', '200 miles', '250 miles', '300 miles', '350 miles'],
-        choices: choice,
-        validate: (answer) => {
-            if (answer.length > 1 || answer.length === 0) {
-                return 'Error: You must select 1 choice only'
-            } else {
-                return true
-            }
-        }
-    }])
-}
 // menu io loop
 const menu_recur = () => {
     
@@ -111,7 +81,17 @@ const menu_recur = () => {
             }
             case 'history': {
                 //console.log(array)
-                history_inquirer().then(result => {
+
+                if (array.length == 1){
+                    console.log('Search History is empty');
+                    return menu_recur()
+                }
+
+                history_inquirer.history_inquirer(array).then(result => {
+                    if (result.option == 'return to menu'){
+                        return menu_recur()
+                    }
+
                     let param = result.option.split(' ==> ');
                     if (param[0] == 'today') {
                         console.log( colors.yellow(`node cli dateWeather -l ${param[1]}`) )
@@ -119,17 +99,19 @@ const menu_recur = () => {
                     }
                     else if (param[0] == 'radius') {
                         if (param[1] == 'location + weather condition + radius') {
+                            console.log(`node cli searchWeatherAndDistance ${param[2]}`)
                             searchWeatherWithinRange(param[2]);
                         }
                         else {
+                            console.log(`node cli searchDistance ${param[2]}`)
                             surroundingCitiesWeather(param[2]);
                         }
                     }
                     else if (param[0] == 'date range') {
+                        console.log(`node cli filterSearch ${param[1]} [${param[2]},${param[3]}]`)
                         filterSearch(param[1], [param[2], param[3]])
                     }
                 })
-
                 break;
             }
 
@@ -476,23 +458,21 @@ const pushArray = () => {
     if (array.length > 6) {
         array.splice(1, 1)
     }
-
-    //if mainLoopChoice and globalLocation not the same, push to array
-    for (x = 0; x < array.length; x++) {
-        if (mainLoopChoice != array[x].mainLoopChoice && globalLocation != array[x].globalLocation) {
-            array.push({
-                mainLoopChoice: mainLoopChoice,
-                radiusChoice: radiusChoice,
-                globalLocation: globalLocation,
-                dateWeatherStartDate: dateWeatherStartDate,
-                dateWeatherEndDate: dateWeatherEndDate,
-                dateWeatherRange: dateWeatherRange,
-                dateRangeWeatherStart: dateRangeWeatherStart,
-                dateRangeWeatherEnd: dateRangeWeatherEnd
-            })
-            break;
+    for (z = 0; z < array.length; z++) {
+        if (mainLoopChoice == array[z].mainLoopChoice && globalLocation == array[z].globalLocation){
+            return
         }
-    }
+     }
+    array.push({
+        mainLoopChoice: mainLoopChoice,
+        radiusChoice: radiusChoice,
+        globalLocation: globalLocation,
+        dateWeatherStartDate: dateWeatherStartDate,
+        dateWeatherEndDate: dateWeatherEndDate,
+        dateWeatherRange: dateWeatherRange,
+        dateRangeWeatherStart: dateRangeWeatherStart,
+        dateRangeWeatherEnd: dateRangeWeatherEnd
+    })
 
 }
 
@@ -512,6 +492,7 @@ const printCliArray = () => {
 
 
 module.exports = {
+    dateWeather,
     menu_recur,
     searchWeatherWithinRange,
     surroundingCitiesWeather,
