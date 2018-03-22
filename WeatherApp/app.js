@@ -322,24 +322,8 @@ const getForecasts = (location, days, selections) => {
                 days.forEach(day => {
                     dateStr = `${day.month + 1}-${day.day}-${day.year}`
                     printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid,
-                        day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, result[0].title, true)
+                        day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, result[0].title, true, days.length)
                 })
-
-                //currently this is a hack to allow for the printing of the date range or today's date
-                setTimeout(() => {
-                    // custom sort to check if dateA is earlier than dateB
-                    datesWithForecasts.sort((a, b) => {
-                        let A = new Date(a.date),
-                            B = new Date(b.date)
-
-                        if (A < B) return -1
-                        if (A > B) return 1
-                        return 0
-                    })
-                    console.log(search.datesTable(datesWithForecasts).toString())
-                    return (cliFlag) ? null : menu_recur()
-                },
-                    5000)
             })
     }
     else {
@@ -349,7 +333,7 @@ const getForecasts = (location, days, selections) => {
 }
 
 // TODO: print all locations with searched string in Today's
-const printForecast = (response, selections, dateStr, datesWithForecasts, location, range = false) => {
+const printForecast = (response, selections, dateStr, datesWithForecasts, location, range = false, days = 1) => {
     let tempForecast
     let output
 
@@ -368,6 +352,22 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, locati
             location: location,
             output: filteredForecast
         })
+
+        let currentForecastCount = datesWithForecasts.length
+        if(currentForecastCount === days) {
+            if(currentForecastCount > 1) {
+                datesWithForecasts.sort((a, b) => {
+                    let A = new Date(a.date),
+                        B = new Date(b.date)
+    
+                    if (A < B) return -1
+                    if (A > B) return 1
+                    return 0
+                })
+            }
+            console.log(search.datesTable(datesWithForecasts).toString())
+            return (cliFlag) ? null : menu_recur()
+        }
     }).catch(err => {
         console.log(err)
     })
