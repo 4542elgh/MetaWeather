@@ -1,5 +1,5 @@
 const
-    weather = require('../MetaWeatherAPI/index'),
+    weather = require('../MetaWeatherAPI/index'), // superagent
     colors = require('colors'),
     mainLoop = require('./mainLoop'),
     rangeSearch = require('./RangeSearch/rangeSearch'),
