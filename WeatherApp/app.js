@@ -281,10 +281,11 @@ const getForecasts = (location, days, selections) => {
                 let dateStr = ''
                 let datesWithForecasts = []
 
-                //if location not found
+                //no data for searched location
                 if (result.length === 0) {
                     console.log(`No data for ${location}`)
-                    return
+                    // fixed bug: return to menu when no data for location is found
+                    return menu_recur()
                 }
 
                 //no date range specified
@@ -322,13 +323,13 @@ const getForecasts = (location, days, selections) => {
     }
 }
 
-// TODO: print all locations with search query string in Today's
+// TODO: print all locations with searched string in Today's
 const printForecast = (response, selections, dateStr, datesWithForecasts, range = false) => {
     let tempForecast
     let output
 
     response.then(forecasts => {
-        // range: ranges of dates, true
+        // range == true -> there is a range of dates
         if (!range) {
             tempForecast = forecasts.consolidated_weather[0]
         }
