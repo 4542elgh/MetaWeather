@@ -69,7 +69,8 @@ const history_inquirer = () => {
 }
 // menu io loop
 const menu_recur = () => {
-
+    
+    console.log('\n') // separate main menu from outputs
     mainLoop.menu().then(result => {
         switch (result.option) {
             case 'today': {
@@ -132,7 +133,7 @@ const menu_recur = () => {
                 break;
             }
 
-            case 'print history': {
+            case 'command': {
                 printCliArray();
                 break;
             }
