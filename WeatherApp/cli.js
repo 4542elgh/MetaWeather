@@ -24,29 +24,17 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
         }
     })
     .command({
-        command:'searchDistance',
+        command:'searchDistance <location>',
         desc: 'Returns the forecast of the surrounding cities within the user specified range.',
         alias: 'sd',
-        builder:(yargs)=>{
-            return yargs.option('l',{
-                alias : 'location',
-                describe: 'Getting weather for specific location'
-            })
-        },
         handler: (argv) => {
             app.surroundingCitiesWeather(argv.location, true)
         }
     })
     .command({
-        command:'searchWeatherAndDistance',
+        command:'searchWeatherAndDistance <location>',
         desc: 'Searches the surrounding cities with the user specified weather condition, and range.',
         alias: 'wd',
-        builder:(yargs)=>{
-            return yargs.option('l',{
-                alias : 'location',
-                describe: 'Getting weather for specific location'
-            })
-        },
         handler: (argv) => {
             app.searchWeatherWithinRange(argv.location, true)
         }
