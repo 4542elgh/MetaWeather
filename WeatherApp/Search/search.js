@@ -44,7 +44,7 @@ const datesTable = (info) => {
 
     if (info.length > 1) { 
         let colSpan = Object.keys(info[0].output).length + 1 //number of filtered keys + date
-        table.push([{colSpan: colSpan, content: 'LOCATION'.cyan.bold + ': ' + info[0].location, hAlign: 'center'}])
+        table.push([{colSpan: colSpan, content: 'LOCATION'.cyan.bold + ': ' + info[0].location.cyan, hAlign: 'center'}])
         tableHeaders = [
             {content: 'DATE'.cyan.bold, hAlign: 'center'}
         ]}
@@ -70,14 +70,14 @@ const datesTable = (info) => {
     if (info.length > 1) {
         info.forEach(element => {
             row = []
-            row.push({ content: element.date, hAlign: 'center' })
+            row.push({ content: element.date.cyan, hAlign: 'center' })
             // temp iterate thru each forecast of all the dates
             temp = element.output
             for (let key in temp) {
                 if (temp.hasOwnProperty(key)) {
                     data = temp[key]
                 }
-                row.push({ content: data, hAlign: 'center' })
+                row.push({ content: data.cyan, hAlign: 'center' })
             }
             table.push(row)
         })
@@ -85,15 +85,15 @@ const datesTable = (info) => {
     else if (info.length === 1) {
         info.forEach(element => {
             row = []
-            row.push({ content: element.date, hAlign: 'center' })
-            row.push({ content: element.location, hAlign: 'center' })
+            row.push({ content: element.date.cyan, hAlign: 'center' })
+            row.push({ content: element.location.cyan, hAlign: 'center' })
             // temp iterate thru each forecast of all the dates
             temp = element.output
             for (let key in temp) {
                 if (temp.hasOwnProperty(key)) {
                     data = temp[key]
                 }
-                row.push({ content: data, hAlign: 'center' })
+                row.push({ content: data.cyan, hAlign: 'center' })
             }
             table.push(row)
         })
@@ -112,7 +112,7 @@ const getDateRange = (dateRange) => {
 
         while (startDate <= endDate) {
             if(response.length > 6) { //short-circuit if the user input a range larger than 7 days
-                console.log( colors.cyan('Range input is sgreater than one week. Only the results up to one week will display.') )
+                console.log( colors.cyan('Range input is greater than one week. Only the results up to one week will display.') )
                 return response
             }
 

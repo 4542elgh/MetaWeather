@@ -25,6 +25,14 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
         }
     })
     .command({
+        command:'dateWeather <location>',
+        desc: 'return weather for specific location',
+        alias: 'dw',
+        handler: (argv) => {
+            app.dateWeather(argv.location,0)
+        }
+    })
+    .command({
         command:'searchDistance <location>',
         desc: 'return surrounding cities and forecasts within the radius from the location',
         alias: 'sd',
@@ -42,14 +50,14 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
     })
     .command({
         command:'search <location> [dateRange..]',
-        desc: 'search <location> return today weather\n' 
+        desc: 'search <location> return today weather of location (major city)\n' 
              +'search <location> [startDate endDate] return a 7-day forecasts from any date between 3/1/13 to today.',
         handler: (argv) => {
             if(argv.dateRange.length === 2 || argv.dateRange.length === 0) { 
                 app.filterSearch(argv.location, argv.dateRange, true)
             }
             else {
-                console.log( colors.cyan('Invalid date format. Type `help` for the help menu.') )
+                console.log( colors.black.bgYellow('Error. Invalid date format. Type `help` for the help menu.') )
             }
         }
     })

@@ -101,11 +101,11 @@ const table = (result)=>{
         
     });
     result.forEach(city =>{
-        table.push([{hAlign:'center', content:city.cityName.white}, {hAlign:'center', content:city.distance.white}, {hAlign:'center', content:city.conditions.white},{hAlign:'center', content:city.temperature.white},{hAlign:'center', content:city.minTemp.white}, {hAlign:'center', content:city.maxTemp.white},{hAlign:'center', content:city.humidity.white},{hAlign:'center', content:city.wind.white}, {hAlign:'center', content:city.air_pressure.white}])
+        table.push([{hAlign:'center', content:city.cityName.cyan}, {hAlign:'center', content:city.distance.cyan}, {hAlign:'center', content:city.conditions.cyan},{hAlign:'center', content:city.temperature.cyan},{hAlign:'center', content:city.minTemp.cyan}, {hAlign:'center', content:city.maxTemp.cyan},{hAlign:'center', content:city.humidity.cyan},{hAlign:'center', content:city.wind.cyan}, {hAlign:'center', content:city.air_pressure.cyan}])
     })
     return table;
 }
 
 module.exports = {
-    sortResults,table,citiesInfo,searchWeather,selectWeather,selectRange
+    sortResults, table, citiesInfo, searchWeather, selectWeather, selectRange
 }

@@ -1,11 +1,12 @@
 const
-    weather = require('../MetaWeatherAPI/index'),
+    weather = require('../MetaWeatherAPI/index'), // superagent
     colors = require('colors'),
     mainLoop = require('./mainLoop'),
     rangeSearch = require('./RangeSearch/rangeSearch'),
     rangeSearch_inquirer = require('./RangeSearch/inquirer'),
     search = require('./Search/search'),
     search_inquirer = require('./Search/inquirer'),
+    history_inquirer = require('./History/inquirer')
     inquirer = require('inquirer'), //temp <-- remove later
     Table = require('cli-table2'),
     filename = 'weatherSearchHistory.json',
@@ -35,38 +36,7 @@ var
     }],
     cliStrings = []
 
-const history_inquirer = () => {
-    let choice = [];
-    array.forEach((item, index) => {
-        if (index == 0) { }
-        else {
-            if (item.mainLoopChoice == 'today') {
-                choice.push(`${item.mainLoopChoice} ==> ${item.globalLocation}`)
-            }
-            else if (item.mainLoopChoice == 'date range') {
-                choice.push(`${item.mainLoopChoice} ==> ${item.globalLocation} ==> ${item.dateRangeWeatherStart} ==> ${item.dateRangeWeatherEnd}`)
-            }
-            else if (item.mainLoopChoice == 'radius') {
-                choice.push(`${item.mainLoopChoice} ==> ${item.radiusChoice} ==> ${item.globalLocation}`)
-            }
 
-        }
-    })
-    return inquirer.prompt([{
-        type: 'list',
-        message: 'Select the range in miles to search',
-        name: 'option',
-        // choices: ['50 miles', '100 miles', '150 miles', '200 miles', '250 miles', '300 miles', '350 miles'],
-        choices: choice,
-        validate: (answer) => {
-            if (answer.length > 1 || answer.length === 0) {
-                return 'Error: You must select 1 choice only'
-            } else {
-                return true
-            }
-        }
-    }])
-}
 // menu io loop
 const menu_recur = () => {
     
@@ -111,25 +81,37 @@ const menu_recur = () => {
             }
             case 'history': {
                 //console.log(array)
-                history_inquirer().then(result => {
+
+                if (array.length == 1){
+                    console.log( colors.cyan('Search History is empty') );
+                    return menu_recur()
+                }
+
+                history_inquirer.history_inquirer(array).then(result => {
+                    if (result.option == 'return to menu'){
+                        return menu_recur()
+                    }
+
                     let param = result.option.split(' ==> ');
                     if (param[0] == 'today') {
-                        console.log(`node cli dateWeather -l ${param[1]}`)
+                        console.log( colors.yellow(`node cli dateWeather -l ${param[1]}`) )
                         dateWeather(param[1])
                     }
                     else if (param[0] == 'radius') {
                         if (param[1] == 'location + weather condition + radius') {
+                            console.log(`node cli searchWeatherAndDistance ${param[2]}`)
                             searchWeatherWithinRange(param[2]);
                         }
                         else {
+                            console.log(`node cli searchDistance ${param[2]}`)
                             surroundingCitiesWeather(param[2]);
                         }
                     }
                     else if (param[0] == 'date range') {
+                        console.log(`node cli filterSearch ${param[1]} [${param[2]},${param[3]}]`)
                         filterSearch(param[1], [param[2], param[3]])
                     }
                 })
-
                 break;
             }
 
@@ -157,7 +139,7 @@ const selectRange = (result) => {
 const searchWeather = (cities, weather) => {
     let result = rangeSearch.searchWeather(cities, weather)
     if (result.length === 0) {
-        console.log(colors.blue('There are no results for the miles and weather condition specified.'))
+        console.log(colors.black.bgYellow('There are no results for the miles and weather condition specified.'))
         return (cliFlag) ? null : menu_recur()
     }
     else {
@@ -201,8 +183,8 @@ const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
     dateWeatherEndDate = endDate;
     dateWeatherRange = range;
     //cli output
-    //console.log('node cli.js search "' + globalLocation + '"');
-    cliArray('node cli.js search "' + globalLocation + '"');
+    //console.log('node cli search "' + globalLocation + '"');
+    cliArray( colors.yellow('node cli search "' + globalLocation + '"') );
     search_inquirer.getWeatherFilters(cliFlag)
         .then(filters => {
             if (filters.conditions.toString() === 'return to menu') {
@@ -224,17 +206,17 @@ const dateRangeWeather = (location) => {
             dateRangeWeatherStart = start.startDate;
             dateRangeWeatherEnd = end.endDate;
             //cli output
-            //console.log('node cli.js search "' + globalLocation +'" ' + dateRangeWeatherStart + ' ' + dateRangeWeatherEnd);
-            cliArray('node cli search "' + globalLocation + '" ' + dateRangeWeatherStart + ' ' + dateRangeWeatherEnd);
+            //console.log('node cli search "' + globalLocation +'" ' + dateRangeWeatherStart + ' ' + dateRangeWeatherEnd);
+            cliArray( colors.yellow('node cli search "' + globalLocation + '" ' + dateRangeWeatherStart + ' ' + dateRangeWeatherEnd) );
             pushArray();
             if (startDate.toString() === 'Invalid Date'
                 || endDate.toString() === 'Invalid Date') {
-                console.log(colors.blue('Invalid start or end date. Returning to main menu.'))
+                console.log(colors.black.bgYellow('Error. Invalid start or end date.'))
                 return (cliFlag) ? null : menu_recur()
             }
 
             if (new Date(start.startDate) > new Date(end.endDate)) {
-                console.log(colors.blue('Error. Start date later than end date. Returning to main menu.'))
+                console.log(colors.black.bgYellow('Error. Start date later than end date.'))
                 return (cliFlag) ? null : menu_recur()
             }
             filterSearch(location, [start.startDate, end.endDate])
@@ -248,8 +230,8 @@ const surroundingCitiesWeather = (location, cli = false) => {
     cliFlag = cli
     globalLocation = location;
     //cli output
-    //console.log('node cli.js searchDistance -l ' + globalLocation);
-    cliArray('node cli searchDistance -l ' + globalLocation);
+    //console.log('node cli searchDistance -l ' + globalLocation);
+    cliArray( colors.yellow('node cli searchDistance -l ' + globalLocation) );
     pushArray();
     let
         lattLong = []
@@ -257,7 +239,7 @@ const surroundingCitiesWeather = (location, cli = false) => {
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
             if (result.length === 0) {
-                console.log(colors.blue(`There are no results for ${location}.`))
+                console.log(colors.black.bgYellow(`There are no results for ${location}.`))
                 return (cliFlag) ? null : menu_recur()
             }
             else {
@@ -289,8 +271,8 @@ const searchWeatherWithinRange = (location, cli = false) => {
     cliFlag = cli
     globalLocation = location;
     //cli output
-    //console.log('node cli.js searchWeatherAndDistance -l '+ globalLocation);
-    cliArray('node cli searchWeatherAndDistance -l ' + globalLocation);
+    //console.log('node cli searchWeatherAndDistance -l '+ globalLocation);
+    cliArray( colors.yellow('node cli searchWeatherAndDistance -l ' + globalLocation) );
     pushArray();
     let
         lattLong = []
@@ -299,7 +281,7 @@ const searchWeatherWithinRange = (location, cli = false) => {
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
             if (result.length === 0) {
-                console.log(colors.blue(`There are no results for ${location}.`))
+                console.log(colors.black.bgYellow(`There are no results for ${location}.`))
                 return (cliFlag) ? null : menu_recur()
             }
             else {
@@ -326,8 +308,7 @@ const getForecasts = (location, days, selections) => {
 
                 //no data for searched location
                 if (result.length === 0) {
-                    console.log(colors.blue(`No data for ${location}`))
-                    // fixed bug: return to menu when no data for location is found
+                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
                     return (cliFlag) ? null : menu_recur()
                 }
 
@@ -341,34 +322,18 @@ const getForecasts = (location, days, selections) => {
                 days.forEach(day => {
                     dateStr = `${day.month + 1}-${day.day}-${day.year}`
                     printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid,
-                        day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, result[0].title, true)
+                        day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, result[0].title, true, days.length)
                 })
-
-                //currently this is a hack to allow for the printing of the date range or today's date
-                setTimeout(() => {
-                    // custom sort to check if dateA is earlier than dateB
-                    datesWithForecasts.sort((a, b) => {
-                        let A = new Date(a.date),
-                            B = new Date(b.date)
-
-                        if (A < B) return -1
-                        if (A > B) return 1
-                        return 0
-                    })
-                    console.log(search.datesTable(datesWithForecasts).toString())
-                    return (cliFlag) ? null : menu_recur()
-                },
-                    5000)
             })
     }
     else {
-        console.log(colors.blue('Invalid location. Returning to main menu.'))
+        console.log(colors.black.bgYellow('Error. Invalid location. '))
         return (cliFlag) ? null : menu_recur()
     }
 }
 
 // TODO: print all locations with searched string in Today's
-const printForecast = (response, selections, dateStr, datesWithForecasts, location, range = false) => {
+const printForecast = (response, selections, dateStr, datesWithForecasts, location, range = false, days = 1) => {
     let tempForecast
     let output
 
@@ -387,6 +352,22 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, locati
             location: location,
             output: filteredForecast
         })
+
+        let currentForecastCount = datesWithForecasts.length
+        if(currentForecastCount === days) {
+            if(currentForecastCount > 1) {
+                datesWithForecasts.sort((a, b) => {
+                    let A = new Date(a.date),
+                        B = new Date(b.date)
+    
+                    if (A < B) return -1
+                    if (A > B) return 1
+                    return 0
+                })
+            }
+            console.log(search.datesTable(datesWithForecasts).toString())
+            return (cliFlag) ? null : menu_recur()
+        }
     }).catch(err => {
         console.log(err)
     })
@@ -424,8 +405,8 @@ const history = (array) => {
                 if (err) {
                     console.log(err);
                 }
-                console.log(colors.blue("Search history file not found. Search history file has been created."));
-                console.log(colors.blue("Seach results saved: " + array.length + " of 5."));
+                console.log(colors.cyan("Search history file not found. Search history file has been created."));
+                console.log(colors.cyan("Seach results saved: " + array.length + " of 5."));
             });
         }
 
@@ -459,7 +440,7 @@ const history = (array) => {
 
                 //write updated array to file
                 fs.writeFile(filename, JSON.stringify(historyDataArray), (err) => {
-                    console.log(colors.blue("Seach results saved: " + historyDataArray.length + " of 5."));
+                    console.log(colors.cyan("Seach results saved: " + historyDataArray.length + " of 5."));
                     if (err) {
                         console.log(err);
                     }
@@ -477,23 +458,21 @@ const pushArray = () => {
     if (array.length > 6) {
         array.splice(1, 1)
     }
-
-    //if mainLoopChoice and globalLocation not the same, push to array
-    for (x = 0; x < array.length; x++) {
-        if (mainLoopChoice != array[x].mainLoopChoice && globalLocation != array[x].globalLocation) {
-            array.push({
-                mainLoopChoice: mainLoopChoice,
-                radiusChoice: radiusChoice,
-                globalLocation: globalLocation,
-                dateWeatherStartDate: dateWeatherStartDate,
-                dateWeatherEndDate: dateWeatherEndDate,
-                dateWeatherRange: dateWeatherRange,
-                dateRangeWeatherStart: dateRangeWeatherStart,
-                dateRangeWeatherEnd: dateRangeWeatherEnd
-            })
-            break;
+    for (z = 0; z < array.length; z++) {
+        if (mainLoopChoice == array[z].mainLoopChoice && globalLocation == array[z].globalLocation){
+            return
         }
-    }
+     }
+    array.push({
+        mainLoopChoice: mainLoopChoice,
+        radiusChoice: radiusChoice,
+        globalLocation: globalLocation,
+        dateWeatherStartDate: dateWeatherStartDate,
+        dateWeatherEndDate: dateWeatherEndDate,
+        dateWeatherRange: dateWeatherRange,
+        dateRangeWeatherStart: dateRangeWeatherStart,
+        dateRangeWeatherEnd: dateRangeWeatherEnd
+    })
 
 }
 
@@ -503,7 +482,7 @@ const cliArray = (string) => {
 
 const printCliArray = () => {
     if (cliStrings.length < 1) {
-        console.log('Search history is empty.');
+        console.log( colors.cyan('Search history is empty.') );
     }
     for (x = 0; x < cliStrings.length; x++) {
         console.log(cliStrings[x]);
@@ -513,6 +492,7 @@ const printCliArray = () => {
 
 
 module.exports = {
+    dateWeather,
     menu_recur,
     searchWeatherWithinRange,
     surroundingCitiesWeather,
