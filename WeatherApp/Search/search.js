@@ -32,7 +32,18 @@ const filterForecast = (selections, response) => {
 const datesTable = (info) => {
     let tableHeaders = []
 
+    let table = new Table({
+        chars: {
+            'top': '═'.magenta, 'top-mid': '╤'.magenta, 'top-left': '╔'.magenta, 'top-right': '╗'.magenta
+            , 'bottom': '═'.magenta, 'bottom-mid': '╧'.magenta, 'bottom-left': '╚'.magenta, 'bottom-right': '╝'.magenta
+            , 'left': '║'.magenta, 'left-mid': '╟'.magenta, 'mid': '─'.magenta, 'mid-mid': '┼'.magenta
+            , 'right': '║'.magenta, 'right-mid': '╢'.magenta, 'middle': '│'.magenta
+        }
+    });
+
     if (info.length > 1) { 
+        let colSpan = Object.keys(info[0].output).length + 1 //number of filtered keys + date
+        table.push([{colSpan: colSpan, content: 'LOCATION'.cyan.bold + ': ' + info[0].location, hAlign: 'center'}])
         tableHeaders = [
             {content: 'DATE'.cyan.bold, hAlign: 'center'}
         ]}
@@ -53,17 +64,7 @@ const datesTable = (info) => {
         }
     }
 
-    let table = new Table({
-        chars: {
-            'top': '═'.magenta, 'top-mid': '╤'.magenta, 'top-left': '╔'.magenta, 'top-right': '╗'.magenta
-            , 'bottom': '═'.magenta, 'bottom-mid': '╧'.magenta, 'bottom-left': '╚'.magenta, 'bottom-right': '╝'.magenta
-            , 'left': '║'.magenta, 'left-mid': '╟'.magenta, 'mid': '─'.magenta, 'mid-mid': '┼'.magenta
-            , 'right': '║'.magenta, 'right-mid': '╢'.magenta, 'middle': '│'.magenta
-        },
-
-        head: tableHeaders
-    });
-
+    table.push(tableHeaders)
 
     if (info.length > 1) {
         info.forEach(element => {
