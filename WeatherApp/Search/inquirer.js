@@ -1,11 +1,29 @@
 const inquirer = require('inquirer')
 
+const dateValid = (choice) => {
+    let tempDate = new Date(choice)
+
+    if(tempDate.toString() === 'Invalid Date'){
+        return false;
+    }
+
+    let lowerBound = new Date('2/28/13')
+    let upperBound = new Date() //today
+    if(tempDate > lowerBound && tempDate <= upperBound) {
+        return true;
+    }
+    return false;
+}
+
 const startDate_inquirer = () => {
     return inquirer.prompt([{
         type: 'input',
-        message: 'Enter the start date:',
+        message: 'Enter the start date (between 3/1/13 and today):',
         name: 'startDate',
         validate: (choices) => {
+            if(!dateValid(choices)) {
+                return 'Invalid date. Please try entering a valid date.'
+            }
             if (choices > 1 || choices < 0) {
                 return false;
             }
@@ -19,9 +37,12 @@ const startDate_inquirer = () => {
 const endDate_inquirer = () => {
     return inquirer.prompt([{
         type: 'input',
-        message: 'Enter the end date:',
+        message: 'Enter the end date (between 3/1/13 and today):',
         name: 'endDate',
         validate: (choices) => {
+            if(!dateValid(choices)) {
+                return 'Invalid date. Please try entering a valid date.'
+            }
             if (choices > 1 || choices < 0) {
                 return false;
             }
