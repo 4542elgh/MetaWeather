@@ -289,7 +289,7 @@ const getForecasts = (location, days, selections) => {
 
                 //no data for searched location
                 if (result.length === 0) {
-                    console.log(`No data for ${location}`)
+                    console.log( colors.blue(`No data for ${location}`) )
                     // fixed bug: return to menu when no data for location is found
                     return (cliFlag) ? null : menu_recur()
                 }
