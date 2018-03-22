@@ -30,7 +30,8 @@ var
         dateWeatherRange: dateWeatherRange,
         dateRangeWeatherStart: dateRangeWeatherStart,
         dateRangeWeatherEnd: dateRangeWeatherEnd,
-    }];
+    }],
+    cliStrings = []
 
 const menu_recur = () => {
 
@@ -78,8 +79,8 @@ const menu_recur = () => {
                 break;
             }
             case 'history': {
-                console.log(array)
-
+                //console.log(array)
+                printCliArray();
                 if (mainLoopChoice == 'today') {
                     console.log('History For: ' + mainLoopChoice + ' Location: ' + globalLocation);
                     dateWeather(globalLocation, 0)
@@ -87,7 +88,7 @@ const menu_recur = () => {
                 }
                 else if (mainLoopChoice == 'date range') {
 
-                    if (array[x].mainLoopChoice == 'date range') {
+                    if (array.mainLoopChoice == 'date range') {
 
                         console.log('History For: ' + mainLoopChoice + ' Location: ' + globalLocation);
                         filterSearch(globalLocation, [dateRangeWeatherStart, dateRangeWeatherEnd]);
@@ -178,6 +179,9 @@ const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
     dateWeatherStartDate = startDate;
     dateWeatherEndDate = endDate;
     dateWeatherRange = range;
+    //cli output
+    //console.log('node cli.js search "' + globalLocation + '"');
+    cliArray('node cli.js search "' + globalLocation + '"');
     search_inquirer.getWeatherFilters()
         .then(filters => {
             getForecasts(location, [], filters.conditions)
@@ -195,6 +199,9 @@ const dateRangeWeather = (location) => {
             globalLocation = location;
             dateRangeWeatherStart = start.startDate;
             dateRangeWeatherEnd = end.endDate;
+            //cli output
+            //console.log('node cli.js search "' + globalLocation +'" ' + dateRangeWeatherStart + ' ' + dateRangeWeatherEnd);
+            cliArray('node cli.js search "' + globalLocation + '" ' + dateRangeWeatherStart + ' ' + dateRangeWeatherEnd);
             // pushArray();
             if (startDate.toString() === 'Invalid Date'
                 || endDate.toString() === 'Invalid Date') {
@@ -215,6 +222,9 @@ const dateRangeWeather = (location) => {
 
 const surroundingCitiesWeather = (location) => {
     globalLocation = location;
+    //cli output
+    //console.log('node cli.js searchDistance -l ' + globalLocation);
+    cliArray('node cli.js searchDistance -l ' + globalLocation);
     //pushArray();
     let
         lattLong = []
@@ -251,7 +261,10 @@ const selectWeather = (result) => {
 
 const searchWeatherWithinRange = (location) => {
     globalLocation = location;
-    pushArray();
+    //cli output
+    //console.log('node cli.js searchWeatherAndDistance -l '+ globalLocation);
+    cliArray('node cli.js searchWeatherAndDistance -l ' + globalLocation);
+    //pushArray();
     let
         lattLong = []
 
@@ -304,19 +317,19 @@ const getForecasts = (location, days, selections) => {
 
                 //find a better interval
                 //currently this is a hack to allow for the printing of the date range or today's date
-                    setTimeout(() => {
-                        // custom sort to check if dateA is earlier than dateB
-                        datesWithForecasts.sort((a, b) => {
-                            let A = new Date(a.date),
-                                B = new Date(b.date)
+                setTimeout(() => {
+                    // custom sort to check if dateA is earlier than dateB
+                    datesWithForecasts.sort((a, b) => {
+                        let A = new Date(a.date),
+                            B = new Date(b.date)
 
-                            if (A < B) return -1
-                            if (A > B) return 1
-                            return 0
-                        })
-                        console.log(search.datesTable(datesWithForecasts).toString())
-                        return menu_recur()
-                    }, 
+                        if (A < B) return -1
+                        if (A > B) return 1
+                        return 0
+                    })
+                    console.log(search.datesTable(datesWithForecasts).toString())
+                    return menu_recur()
+                },
                     5000)
             })
     }
@@ -448,6 +461,16 @@ const pushArray = () => {
         dateRangeWeatherStart: dateRangeWeatherStart,
         dateRangeWeatherEnd: dateRangeWeatherEnd
     })
+}
+
+const cliArray = (string) => {
+    cliStrings.push(string);
+}
+
+const printCliArray = () => {
+    for (x = 0; x < cliStrings.length; x++) {
+        console.log(cliStrings[x]);
+    }
 }
 
 
