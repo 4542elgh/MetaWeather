@@ -25,7 +25,7 @@ const menu = ()=>{
         type:'list',
         message:'Menu:',
         name:'option',
-        choices:[new inquirer.Separator('---Search---'),'today','date range','radius',new inquirer.Separator('-----------'),'history','exit'],
+        choices:[new inquirer.Separator('---Search---'),'today','date range','radius',new inquirer.Separator('-----------'),'history','print history','exit'],
         validate:(choices)=>{
             if(choices>1 || choices<0){
                 return false;
