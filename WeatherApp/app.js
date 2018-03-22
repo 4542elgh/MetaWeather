@@ -177,6 +177,9 @@ const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
     dateWeatherRange = range;
     search_inquirer.getWeatherFilters()
         .then(filters => {
+            if(filters.conditions.toString() === 'exit') {
+                return menu_recur()
+            }
             getForecasts(location, [], filters.conditions)
         })
         .catch(err => {
@@ -361,6 +364,9 @@ const filterSearch = (location, dateRange) => {
     let days = search.getDateRange(dateRange)
     search_inquirer.getWeatherFilters()
         .then(filters => {
+            if(filters.conditions.toString() === 'exit') {
+                return menu_recur()
+            }
             getForecasts(location, days, filters.conditions)
         })
 }
