@@ -111,7 +111,7 @@ const getDateRange = (dateRange) => {
 
         while (startDate <= endDate) {
             if(response.length > 6) { //short-circuit if the user input a range larger than 7 days
-                console.log( colors.cyan('Range input greater than one week. Only the results up to one week will display.') )
+                console.log( colors.cyan('Range input is sgreater than one week. Only the results up to one week will display.') )
                 return response
             }
 
