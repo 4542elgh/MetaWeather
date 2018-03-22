@@ -1,6 +1,7 @@
 const
     utilities = require('../utils/utilities'),
-    Table = require('cli-table2')
+    Table = require('cli-table2'),
+    colors = require('colors')
 
 const filterForecast = (selections, response) => {
     let filteredForecast = {}
@@ -110,7 +111,7 @@ const getDateRange = (dateRange) => {
 
         while (startDate <= endDate) {
             if(response.length > 6) { //short-circuit if the user input a range larger than 7 days
-                console.log('Range input greater than one week. Only the results up to one week will display.')
+                console.log( colors.cyan('Range input greater than one week. Only the results up to one week will display.') )
                 return response
             }
 
