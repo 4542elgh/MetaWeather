@@ -55,5 +55,5 @@ const radius_submenu = ()=>{
 }
 
 module.exports = {
-    ui,menu,radius_submenu
+    ui, menu, radius_submenu
 }

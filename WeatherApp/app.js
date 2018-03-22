@@ -11,8 +11,9 @@ const
     filename = 'weatherSearchHistory.json',
     fs = require('fs')
 
-
+// creating variables to store in history feature
 var
+    cliFlag = false,
     mainLoopChoice = '',
     radiusChoice = '',
     globalLocation = '',
@@ -21,6 +22,7 @@ var
     dateWeatherRange = '',
     dateRangeWeatherStart = '',
     dateRangeWeatherEnd = '',
+
     array = [{
         mainLoopChoice: mainLoopChoice,
         radiusChoice: radiusChoice,
@@ -33,12 +35,10 @@ var
     }],
     cliStrings = []
 
+// menu io loop
 const menu_recur = () => {
 
-
-
     mainLoop.menu().then(result => {
-
         switch (result.option) {
             case 'today': {
                 mainLoop.ui().then(location => {
@@ -52,7 +52,6 @@ const menu_recur = () => {
             case 'date range': {
                 mainLoop.ui().then(location => {
                     dateRangeWeather(location.location)
-
                 })
                 mainLoopChoice = 'date range';
                 break;
@@ -60,7 +59,7 @@ const menu_recur = () => {
             case 'radius': {
                 mainLoop.radius_submenu().then(result => {
                     if (result.option === 'return to menu') {
-                        return menu_recur()
+                        return (cliFlag) ? null : menu_recur()
                     }
                     mainLoop.ui().then(location => {
                         if (result.option === 'location + radius') {
@@ -112,8 +111,7 @@ const menu_recur = () => {
                     }
                     break;
                 }
-                return menu_recur()
-
+                return (cliFlag) ? null : menu_recur()
 
             }
             case 'exit': {
@@ -136,8 +134,8 @@ const selectRange = (result) => {
 const searchWeather = (cities, weather) => {
     let result = rangeSearch.searchWeather(cities, weather)
     if (result.length === 0) {
-        console.log('Sorry there are no results for the miles and weather condition specified.')
-        return menu_recur()
+        console.log( colors.blue('There are no results for the miles and weather condition specified.') )
+        return (cliFlag) ? null : menu_recur()
     }
     else {
         print(result)
@@ -173,7 +171,7 @@ const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
 }
 
 //today and daterange start-------------------------------------------------------------------------------
-//note: validate start and end date
+
 const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
     globalLocation = location;
     dateWeatherStartDate = startDate;
@@ -184,6 +182,9 @@ const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
     cliArray('node cli.js search "' + globalLocation + '"');
     search_inquirer.getWeatherFilters()
         .then(filters => {
+            if(filters.conditions.toString() === 'return to menu') {
+                return (cliFlag) ? null : menu_recur()
+            }
             getForecasts(location, [], filters.conditions)
         })
         .catch(err => {
@@ -205,13 +206,13 @@ const dateRangeWeather = (location) => {
             // pushArray();
             if (startDate.toString() === 'Invalid Date'
                 || endDate.toString() === 'Invalid Date') {
-                console.log('Invalid start or end date. Returning to main menu.')
-                return menu_recur()
+                console.log( colors.blue('Invalid start or end date. Returning to main menu.') )
+                return (cliFlag) ? null : menu_recur()
             }
 
             if (new Date(start.startDate) > new Date(end.endDate)) {
-                console.log('Error. Start date later than end date. Returning to main menu.')
-                return menu_recur()
+                console.log( colors.blue('Error. Start date later than end date. Returning to main menu.') )
+                return (cliFlag) ? null : menu_recur()
             }
             filterSearch(location, [start.startDate, end.endDate])
         })
@@ -220,7 +221,8 @@ const dateRangeWeather = (location) => {
 
 //today and daterange end---------------------------------------------------------------------------------
 
-const surroundingCitiesWeather = (location) => {
+const surroundingCitiesWeather = (location, cli = false) => {
+    cliFlag = cli
     globalLocation = location;
     //cli output
     //console.log('node cli.js searchDistance -l ' + globalLocation);
@@ -232,8 +234,8 @@ const surroundingCitiesWeather = (location) => {
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
             if (result.length === 0) {
-                console.log(`Sorry, there are no results in the MetaWeather API for ${location}.`)
-                return menu_recur()
+                console.log( colors.blue(`There are no results for ${location}.`) )
+                return (cliFlag) ? null : menu_recur()
             }
             else {
                 lattLong = result[0].latt_long.split(',')
@@ -246,6 +248,7 @@ const surroundingCitiesWeather = (location) => {
         })
         .catch(err => console.log(err))
 }
+
 //----------------Search by Weather and Range Starts Here-----------------
 
 const selectWeather = (result) => {
@@ -259,7 +262,8 @@ const selectWeather = (result) => {
         })
 }
 
-const searchWeatherWithinRange = (location) => {
+const searchWeatherWithinRange = (location, cli = false) => {
+    cliFlag = cli
     globalLocation = location;
     //cli output
     //console.log('node cli.js searchWeatherAndDistance -l '+ globalLocation);
@@ -272,8 +276,8 @@ const searchWeatherWithinRange = (location) => {
         .then(result => {
             //Validating to make sure that the city entered exists within the MetaWeather API
             if (result.length === 0) {
-                console.log(`Sorry, there are no results in the MetaWeather API for ${location}.`)
-                return menu_recur()
+                console.log( colors.blue(`There are no results for ${location}.`) )
+                return (cliFlag) ? null : menu_recur()
             }
             else {
                 lattLong = result[0].latt_long.split(',')
@@ -297,10 +301,11 @@ const getForecasts = (location, days, selections) => {
                 let dateStr = ''
                 let datesWithForecasts = []
 
-                //if location not found
+                //no data for searched location
                 if (result.length === 0) {
-                    console.log(`No data for ${location}`)
-                    return
+                    console.log( colors.blue(`No data for ${location}`) )
+                    // fixed bug: return to menu when no data for location is found
+                    return (cliFlag) ? null : menu_recur()
                 }
 
                 //no date range specified
@@ -315,7 +320,6 @@ const getForecasts = (location, days, selections) => {
                         day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, true)
                 })
 
-                //find a better interval
                 //currently this is a hack to allow for the printing of the date range or today's date
                 setTimeout(() => {
                     // custom sort to check if dateA is earlier than dateB
@@ -323,29 +327,29 @@ const getForecasts = (location, days, selections) => {
                         let A = new Date(a.date),
                             B = new Date(b.date)
 
-                        if (A < B) return -1
-                        if (A > B) return 1
-                        return 0
-                    })
-                    console.log(search.datesTable(datesWithForecasts).toString())
-                    return menu_recur()
-                },
+                            if (A < B) return -1
+                            if (A > B) return 1
+                            return 0
+                        })
+                        console.log(search.datesTable(datesWithForecasts).toString())
+                        return (cliFlag) ? null : menu_recur()
+                    }, 
                     5000)
             })
     }
     else {
-        console.log('Invalid location. Returning to main menu.')
-        return menu_recur()
+        console.log( colors.blue('Invalid location. Returning to main menu.') )
+        return (cliFlag) ? null : menu_recur()
     }
 }
 
-// TODO: print all locations with search query string in Today's
+// TODO: print all locations with searched string in Today's
 const printForecast = (response, selections, dateStr, datesWithForecasts, range = false) => {
     let tempForecast
     let output
 
     response.then(forecasts => {
-        // range: ranges of dates, true
+        // range == true -> there is a range of dates
         if (!range) {
             tempForecast = forecasts.consolidated_weather[0]
         }
@@ -374,21 +378,27 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, range 
 }
 
 // wrapper for search
-const filterSearch = (location, dateRange) => {
+const filterSearch = (location, dateRange, cli = false) => {
+    cliFlag = cli
     let days = search.getDateRange(dateRange)
     search_inquirer.getWeatherFilters()
         .then(filters => {
+            if(filters.conditions.toString() === 'return to menu') {
+                return (cliFlag) ? null : menu_recur()
+            }
             getForecasts(location, days, filters.conditions)
         })
 }
 
 const print = (result) => {
     console.log(rangeSearch.table(result).toString())
-    return menu_recur()
+    return (cliFlag) ? null : menu_recur()
 }
 
+//----------------History Starts Here-----------------
+
 const history = (array) => {
-    console.log("test")
+
     fs.open(filename, 'r', (err, fd) => {
 
         //create file if it doesn't already exist
@@ -397,8 +407,8 @@ const history = (array) => {
                 if (err) {
                     console.log(err);
                 }
-                console.log("Search history file not found. Search history file has been created.");
-                console.log("Seach results saved: " + array.length + " of 5.");
+                console.log( colors.blue("Search history file not found. Search history file has been created.") );
+                console.log( colors.blue("Seach results saved: " + array.length + " of 5.") );
             });
         }
 
@@ -432,7 +442,7 @@ const history = (array) => {
 
                 //write updated array to file
                 fs.writeFile(filename, JSON.stringify(historyDataArray), (err) => {
-                    console.log("Seach results saved: " + historyDataArray.length + " of 5.");
+                    console.log( colors.blue("Seach results saved: " + historyDataArray.length + " of 5.") );
                     if (err) {
                         console.log(err);
                     }

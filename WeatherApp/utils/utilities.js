@@ -16,5 +16,5 @@ const CtoF = (celsius) =>{
 }
 
 module.exports = {
-    milesToMeters,metersToMiles,CtoF
+    milesToMeters, metersToMiles, CtoF
 }

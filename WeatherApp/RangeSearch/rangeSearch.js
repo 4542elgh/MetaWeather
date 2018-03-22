@@ -29,7 +29,7 @@ const sortResults = (cities)=> {
 const citiesInfo = (result,city)=>{
     return {
         cityName: result.title,
-        distance: city.distance, //need the distance in order to order them from closest to farthest
+        distance: city.distance, //need the distance in order to arrange them from closest to farthest
         conditions: result.consolidated_weather[0].weather_state_name,
         temperature: utilities.CtoF(result.consolidated_weather[0].the_temp) + '°F',
         minTemp: utilities.CtoF(result.consolidated_weather[0].min_temp) + '°F' ,
