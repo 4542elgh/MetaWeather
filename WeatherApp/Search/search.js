@@ -109,6 +109,11 @@ const getDateRange = (dateRange) => {
     if ((dateRange !== null) && (startDate <= currentDate) && (endDate <= currentDate)) {
 
         while (startDate <= endDate) {
+            if(response.length > 6) { //short-circuit if the user input a range larger than 7 days
+                console.log('Range input greater than one week. Only the results up to one week will display.')
+                return response
+            }
+
             response.push({
                 year: startDate.getFullYear(),
                 month: startDate.getMonth(),
