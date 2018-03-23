@@ -52,7 +52,7 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
     .command({
         command:'search <location> [dateRange..]',
         desc: 'search <location> return today weather of location (major city)\n' 
-             +'search <location> [startDate endDate] return a 7-day forecasts from any date between 3/1/13 to today.',
+             +'search <location> [startDate endDate] return a 7-day forecasts from any date between 1/1/14 to today.',
         handler: (argv) => {
             let validDates = false
             if(argv.dateRange.length === 2 && utilities.dateValid(argv.dateRange[0]) 

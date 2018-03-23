@@ -296,7 +296,7 @@ const searchWeatherWithinRange = (location, cli = false) => {
         .catch(err => console.log(err))
 }
 
-// gets forecasts of location
+// gets forecasts of location + [range of dates]
 const getForecasts = (location, days, selections) => {
     if ((location.trim() != '') && (location.length != 0)) {
         weather.woeid_by_query(location)
@@ -327,12 +327,12 @@ const getForecasts = (location, days, selections) => {
             })
     }
     else {
-        console.log(colors.black.bgYellow('Error. Invalid location. '))
+        console.log(colors.black.bgYellow('Error. Invalid location.'))
         return (cliFlag) ? null : menu_recur()
     }
 }
 
-// TODO: print all locations with searched string in Today's
+
 const printForecast = (response, selections, dateStr, datesWithForecasts, location, range = false, days = 1) => {
     let tempForecast
     let output
@@ -374,7 +374,7 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, locati
 
 }
 
-// wrapper for search
+// search() for command in cli
 const filterSearch = (location, dateRange, cli = false) => {
     cliFlag = cli
     let days = search.getDateRange(dateRange)
