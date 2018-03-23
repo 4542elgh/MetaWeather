@@ -129,52 +129,6 @@ const menu_recur = () => {
     })
 }
 
-const selectRange = (result) => {
-    rangeSearch_inquirer.selectRange_inquirer()
-        .then((answers) => {
-            let withinRange = rangeSearch.selectRange(result, answers)
-            foreCastForCitiesInRange(withinRange)
-        })
-}
-
-const searchWeather = (cities, weather) => {
-    let result = rangeSearch.searchWeather(cities, weather)
-    if (result.length === 0) {
-        console.log(colors.black.bgYellow('There are no results for the miles and weather condition specified.'))
-        return (cliFlag) ? null : menu_recur()
-    }
-    else {
-        print(result)
-    }
-}
-
-//used an empty parameter here in order to reuse this function for another feature
-const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
-    const citiesInfo = []
-    cities.forEach(city => {
-        //getting the weather info for each city in range using the WOEID(Where on Earth ID)
-        weather.get_weather_by_woeid(city.woeid)
-            //this returns the 5 day forecast for all the cities not in the particular order given
-            //but as soon as the API has a response for that city.
-            //Also we only want the forecasts of the day the query is made so the other days are of no cosequence
-            .then(result => {
-                citiesInfo.push(
-                    rangeSearch.citiesInfo(result, city)
-                )
-                //reorganize the list of cities by distance in ascending order,
-                //since our response might shuffle them.
-                if (cities.length === citiesInfo.length) {
-                    if (weatherToSearch.length == 0) {
-                        print(rangeSearch.sortResults(citiesInfo))
-                    }
-                    else {
-                        searchWeather(rangeSearch.sortResults(citiesInfo), weatherToSearch)
-                    }
-                }
-            })
-            .catch(err => console.log(err))
-    })
-}
 
 //today and daterange start-------------------------------------------------------------------------------
 
@@ -226,95 +180,6 @@ const dateRangeWeather = (location) => {
 }
 
 //today and daterange end---------------------------------------------------------------------------------
-
-const surroundingCitiesWeather = (location, cli = false) => {
-    cliFlag = cli
-    globalLocation = location;
-    //cli output
-    //console.log('node cli searchDistance -l ' + globalLocation);
-    cliArray( colors.yellow('node cli searchDistance -l ' + globalLocation) );
-    pushArray();
-    let lattLong = []
-    
-    weather.woeid_by_query(location)
-        .then(result => {
-            utilities.locationFinder(result).then( selectedLocation => {
-                //Validating to make sure that the city entered exists within the MetaWeather API
-                if (result.length === 0) {
-                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
-                    return (cliFlag) ? null : menu_recur()
-                }
-                else {
-                    lattLong = extractProperty(result, selectedLocation.location, true).split(',')
-                    weather.woeid_by_lattlong(lattLong[0], lattLong[1])
-                        .then(result => {
-                            selectRange(result)
-                        })
-                        .catch(err => console.log(err))
-                }
-            })
-        })
-        .catch(err => console.log(err))
-}
-
-//----------------Search by Weather and Range Starts Here-----------------
-
-const selectWeather = (result) => {
-    rangeSearch_inquirer.selectWeather_inquirer()
-        .then((answers) => {
-            rangeSearch_inquirer.selectRange_inquirer()
-                .then((input) => {
-                    let obj = rangeSearch.selectWeather(result, answers, input)
-                    foreCastForCitiesInRange(obj.withinRange, obj.selectedWeather)
-                })
-        })
-}
-
-const searchWeatherWithinRange = (location, cli = false) => {
-    cliFlag = cli
-    globalLocation = location;
-    //cli output
-    //console.log('node cli searchWeatherAndDistance -l '+ globalLocation);
-    cliArray( colors.yellow('node cli searchWeatherAndDistance -l ' + globalLocation) );
-    pushArray();
-    let
-        lattLong = []
-
-    weather.woeid_by_query(location)
-        .then(result => {
-            utilities.locationFinder(result).then( selectedLocation => {
-                //Validating to make sure that the city entered exists within the MetaWeather API
-                if (result.length === 0) {
-                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
-                    return (cliFlag) ? null : menu_recur()
-                }
-                else {
-                    lattLong = extractProperty(result, selectedLocation.location, true).split(',')
-                    weather.woeid_by_lattlong(lattLong[0], lattLong[1])
-                        .then(result => {
-                            selectWeather(result)
-                        })
-                        .catch(err => console.log(err))
-                }
-            })
-        })
-        .catch(err => console.log(err))
-}
-
-const extractProperty = (response, selectedLocation, radiusMarker) => {
-    for (let i = 0; i < response.length; i++) {
-        if (response[i].title === selectedLocation) {
-            if (radiusMarker) {
-                return response[i].latt_long
-            }
-            else {
-                return response[i].woeid
-            }
-        }
-    }
-    // checks if app runs from cli or menu
-    return (cliFlag) ? null : menu_recur()
-}
 
 // gets forecasts of location [range of dates]
 const getForecasts = (location, days, selections) => {
@@ -413,6 +278,148 @@ const filterSearch = (location, dateRange, cli = false) => {
 const print = (result) => {
     console.log(rangeSearch.table(result).toString())
     return (cliFlag) ? null : menu_recur()
+}
+//-------------LOCATION + RADIUS STARTS HERE-----------------------
+const surroundingCitiesWeather = (location, cli = false) => {
+    cliFlag = cli
+    globalLocation = location;
+    //cli output
+    //console.log('node cli searchDistance -l ' + globalLocation);
+    cliArray( colors.yellow('node cli searchDistance -l ' + globalLocation) );
+    pushArray();
+    let lattLong = []
+    
+    weather.woeid_by_query(location)
+        .then(result => {
+            utilities.locationFinder(result).then( selectedLocation => {
+                //Validating to make sure that the city entered exists within the MetaWeather API
+                if (result.length === 0) {
+                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                    return (cliFlag) ? null : menu_recur()
+                }
+                else {
+                    lattLong = extractProperty(result, selectedLocation.location, true).split(',')
+                    weather.woeid_by_lattlong(lattLong[0], lattLong[1])
+                        .then(result => {
+                            selectRange(result)
+                        })
+                        .catch(err => console.log(err))
+                }
+            })
+        })
+        .catch(err => console.log(err))
+}
+
+
+const selectRange = (result) => {
+    rangeSearch_inquirer.selectRange_inquirer()
+        .then((answers) => {
+            let withinRange = rangeSearch.selectRange(result, answers)
+            foreCastForCitiesInRange(withinRange)
+        })
+}
+
+
+
+//used an empty parameter here in order to use this function with both RADIUS features
+const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
+    const citiesInfo = []
+    cities.forEach(city => {
+        //getting the weather info for each city in range using the WOEID(Where on Earth ID)
+        weather.get_weather_by_woeid(city.woeid)
+            //this returns the 5 day forecast for all the cities not in the particular order given
+            //but as soon as the API has a response for that city.
+            //Also we only want the forecasts of the day the query is made so the other days are of no cosequence
+            .then(result => {
+                citiesInfo.push(
+                    rangeSearch.citiesInfo(result, city)
+                )
+                //reorganize the list of cities by distance in ascending order,
+                //since our response might shuffle them.
+                if (cities.length === citiesInfo.length) {
+                    if (weatherToSearch.length == 0) {
+                        print(rangeSearch.sortResults(citiesInfo))
+                    }
+                    else {
+                        searchWeather(rangeSearch.sortResults(citiesInfo), weatherToSearch)
+                    }
+                }
+            })
+            .catch(err => console.log(err))
+    })
+}
+
+
+//-----------LOCATION + RADIUS + WEATHER STARTS HERE---------------------
+
+
+const searchWeatherWithinRange = (location, cli = false) => {
+    cliFlag = cli
+    globalLocation = location;
+    //cli output
+    //console.log('node cli searchWeatherAndDistance -l '+ globalLocation);
+    cliArray( colors.yellow('node cli searchWeatherAndDistance -l ' + globalLocation) );
+    pushArray();
+    let
+        lattLong = []
+
+    weather.woeid_by_query(location)
+        .then(result => {
+            utilities.locationFinder(result).then( selectedLocation => {
+                //Validating to make sure that the city entered exists within the MetaWeather API
+                if (result.length === 0) {
+                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                    return (cliFlag) ? null : menu_recur()
+                }
+                else {
+                    lattLong = extractProperty(result, selectedLocation.location, true).split(',')
+                    weather.woeid_by_lattlong(lattLong[0], lattLong[1])
+                        .then(result => {
+                            selectWeather(result)
+                        })
+                        .catch(err => console.log(err))
+                }
+            })
+        })
+        .catch(err => console.log(err))
+}
+
+const selectWeather = (result) => {
+    rangeSearch_inquirer.selectWeather_inquirer()
+        .then((answers) => {
+            rangeSearch_inquirer.selectRange_inquirer()
+                .then((input) => {
+                    let obj = rangeSearch.selectWeather(result, answers, input)
+                    foreCastForCitiesInRange(obj.withinRange, obj.selectedWeather)
+                })
+        })
+}
+
+
+const extractProperty = (response, selectedLocation, radiusMarker) => {
+    for (let i = 0; i < response.length; i++) {
+        if (response[i].title === selectedLocation) {
+            if (radiusMarker) {
+                return response[i].latt_long
+            }
+            else {
+                return response[i].woeid
+            }
+        }
+    }
+    // checks if app runs from cli or menu
+    return (cliFlag) ? null : menu_recur()
+}
+
+const searchWeather = (cities, weather) => {
+    let result = rangeSearch.searchWeather(cities, weather)
+    if (result.length === 0) {
+        console.log(colors.black.bgYellow('There are no results for the miles and weather condition specified.'))
+        return (cliFlag) ? null : menu_recur()
+    }
+    else {
+        print(result)
+    }
 }
 
 //----------------History Starts Here-----------------
