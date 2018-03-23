@@ -15,6 +15,21 @@ const CtoF = (celsius) =>{
     return farenheit
 }
 
+const dateValid = (choice) => {
+    let tempDate = new Date(choice)
+
+    if(tempDate.toString() === 'Invalid Date'){
+        return false;
+    }
+
+    let lowerBound = new Date('2/28/13')
+    let upperBound = new Date() //today
+    if(tempDate > lowerBound && tempDate <= upperBound) {
+        return true;
+    }
+    return false;
+}
+
 module.exports = {
-    milesToMeters, metersToMiles, CtoF
+    milesToMeters, metersToMiles, CtoF, dateValid
 }

@@ -1,7 +1,8 @@
 const
     app = require('./app'),
     yargs = require('yargs'),
-    colors = require('colors')
+    colors = require('colors'),
+    utilities = require('./utils/utilities')
 
 const flags = yargs.usage('$0: Usage <cmd> [options]')
     .command({
@@ -53,7 +54,15 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
         desc: 'search <location> return today weather of location (major city)\n' 
              +'search <location> [startDate endDate] return a 7-day forecasts from any date between 3/1/13 to today.',
         handler: (argv) => {
-            if(argv.dateRange.length === 2 || argv.dateRange.length === 0) { 
+            let validDates = false
+            if(argv.dateRange.length === 2 && utilities.dateValid(argv.dateRange[0]) 
+                && utilities.dateValid(argv.dateRange[1])) {
+                    if(new Date(argv.dateRange[0]) <= new Date(argv.dateRange[1])) {
+                        validDates = true
+                    }
+                }
+
+            if(validDates || argv.dateRange.length === 0) { 
                 app.filterSearch(argv.location, argv.dateRange, true)
             }
             else {
