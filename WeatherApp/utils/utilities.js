@@ -22,7 +22,7 @@ const dateValid = (choice) => {
         return false;
     }
 
-    let lowerBound = new Date('2/28/13')
+    let lowerBound = new Date('12/31/13')
     let upperBound = new Date() //today
     if(tempDate > lowerBound && tempDate <= upperBound) {
         return true;

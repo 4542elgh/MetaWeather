@@ -4,7 +4,7 @@ const inquirer = require('inquirer'),
 const startDate_inquirer = () => {
     return inquirer.prompt([{
         type: 'input',
-        message: 'Enter the start date (between 3/1/13 and today):',
+        message: 'Enter the start date (between 1/1/14 and today):',
         name: 'startDate',
         validate: (choices) => {
             if(!utilities.dateValid(choices)) {
@@ -23,7 +23,7 @@ const startDate_inquirer = () => {
 const endDate_inquirer = () => {
     return inquirer.prompt([{
         type: 'input',
-        message: 'Enter the end date (between 3/1/13 and today):',
+        message: 'Enter the end date (between 1/1/14 and today):',
         name: 'endDate',
         validate: (choices) => {
             if(!utilities.dateValid(choices)) {
