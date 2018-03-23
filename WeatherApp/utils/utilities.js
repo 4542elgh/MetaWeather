@@ -1,3 +1,31 @@
+const inquirer = require('inquirer')
+
+// response = list of locations from API
+const locationFinder = (response) => {
+    let availableCities = []
+
+    for (let i = 0; i < response.length; i++) {
+        availableCities.push(response[i].title)
+        if (availableCities.length > 5) {
+            break;
+        }
+    }
+    return inquirer.prompt([{
+        type: 'list',
+        message: 'Select a location to search',
+        name: 'location',
+        choices: availableCities,
+        validate: (result) => {
+            if (result.length > 1 || result.lenght <= 0) {
+                return 'Error: You must select one choice only'
+            }
+            else {
+                return true
+            }
+        }
+    }])
+}
+
 const milesToMeters = (miles) => {
     return miles * 1609.34
 }
@@ -31,5 +59,5 @@ const dateValid = (choice) => {
 }
 
 module.exports = {
-    milesToMeters, metersToMiles, CtoF, dateValid
+    locationFinder, milesToMeters, metersToMiles, CtoF, dateValid
 }

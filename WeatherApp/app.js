@@ -7,10 +7,11 @@ const
     search = require('./Search/search'),
     search_inquirer = require('./Search/inquirer'),
     history_inquirer = require('./History/inquirer')
-    inquirer = require('inquirer'), //temp <-- remove later
     Table = require('cli-table2'),
     filename = 'weatherSearchHistory.json',
-    fs = require('fs')
+    fs = require('fs'),
+    utilities = require('./utils/utilities.js'),
+    inquirer = require('inquirer')
 
 // creating variables to store in history feature
 var
@@ -233,23 +234,25 @@ const surroundingCitiesWeather = (location, cli = false) => {
     //console.log('node cli searchDistance -l ' + globalLocation);
     cliArray( colors.yellow('node cli searchDistance -l ' + globalLocation) );
     pushArray();
-    let
-        lattLong = []
+    let lattLong = []
+    
     weather.woeid_by_query(location)
         .then(result => {
-            //Validating to make sure that the city entered exists within the MetaWeather API
-            if (result.length === 0) {
-                console.log(colors.black.bgYellow(`There are no results for ${location}.`))
-                return (cliFlag) ? null : menu_recur()
-            }
-            else {
-                lattLong = result[0].latt_long.split(',')
-                weather.woeid_by_lattlong(lattLong[0], lattLong[1])
-                    .then(result => {
-                        selectRange(result)
-                    })
-                    .catch(err => console.log(err))
-            }
+            utilities.locationFinder(result).then( selectedLocation => {
+                //Validating to make sure that the city entered exists within the MetaWeather API
+                if (result.length === 0) {
+                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                    return (cliFlag) ? null : menu_recur()
+                }
+                else {
+                    lattLong = extractProperty(result, selectedLocation.location, true).split(',')
+                    weather.woeid_by_lattlong(lattLong[0], lattLong[1])
+                        .then(result => {
+                            selectRange(result)
+                        })
+                        .catch(err => console.log(err))
+                }
+            })
         })
         .catch(err => console.log(err))
 }
@@ -279,50 +282,69 @@ const searchWeatherWithinRange = (location, cli = false) => {
 
     weather.woeid_by_query(location)
         .then(result => {
-            //Validating to make sure that the city entered exists within the MetaWeather API
-            if (result.length === 0) {
-                console.log(colors.black.bgYellow(`There are no results for ${location}.`))
-                return (cliFlag) ? null : menu_recur()
-            }
-            else {
-                lattLong = result[0].latt_long.split(',')
-                weather.woeid_by_lattlong(lattLong[0], lattLong[1])
-                    .then(result => {
-                        selectWeather(result)
-                    })
-                    .catch(err => console.log(err))
-            }
+            utilities.locationFinder(result).then( selectedLocation => {
+                //Validating to make sure that the city entered exists within the MetaWeather API
+                if (result.length === 0) {
+                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                    return (cliFlag) ? null : menu_recur()
+                }
+                else {
+                    lattLong = extractProperty(result, selectedLocation.location, true).split(',')
+                    weather.woeid_by_lattlong(lattLong[0], lattLong[1])
+                        .then(result => {
+                            selectWeather(result)
+                        })
+                        .catch(err => console.log(err))
+                }
+            })
         })
         .catch(err => console.log(err))
 }
 
-// gets forecasts of location + [range of dates]
+const extractProperty = (response, selectedLocation, radiusMarker) => {
+    for (let i = 0; i < response.length; i++) {
+        if (response[i].title === selectedLocation) {
+            if (radiusMarker) {
+                return response[i].latt_long
+            }
+            else {
+                return response[i].woeid
+            }
+        }
+    }
+    // checks if app runs from cli or menu
+    return (cliFlag) ? null : menu_recur()
+}
+
+// gets forecasts of location [range of dates]
 const getForecasts = (location, days, selections) => {
     if ((location.trim() != '') && (location.length != 0)) {
         weather.woeid_by_query(location)
 
             .then(result => {
-                let date = new Date()
-                let dateStr = ''
-                let datesWithForecasts = []
+                utilities.locationFinder(result).then( selectedLocation => {
+                    let date = new Date()
+                    let dateStr = ''
+                    let datesWithForecasts = []
 
-                //no data for searched location
-                if (result.length === 0) {
-                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
-                    return (cliFlag) ? null : menu_recur()
-                }
+                    //no data for searched location
+                    if (result.length === 0) {
+                        console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                        return (cliFlag) ? null : menu_recur()
+                    }
 
-                //no date range specified
-                if (days.length === 0) {
-                    dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
-                    printForecast(weather.get_weather_by_woeid(result[0].woeid), 
-                        selections, dateStr, datesWithForecasts, result[0].title)
-                }
+                    //no date range specified
+                    if (days.length === 0) {
+                        dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
+                        printForecast(weather.get_weather_by_woeid(extractProperty(result, selectedLocation.location, false)),
+                            selections, dateStr, datesWithForecasts, selectedLocation.location)
+                    }
 
-                days.forEach(day => {
-                    dateStr = `${day.month + 1}-${day.day}-${day.year}`
-                    printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid,
-                        day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, result[0].title, true, days.length)
+                    days.forEach(day => {
+                        dateStr = `${day.month + 1}-${day.day}-${day.year}`
+                        printForecast(weather.get_weather_by_woeid_at_date(extractProperty(result, selectedLocation.location, false),
+                            day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, selectedLocation.location, true, days.length)
+                    })
                 })
             })
     }
@@ -338,7 +360,7 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, locati
     let output
 
     response.then(forecasts => {
-        // range == true -> there is a range of dates
+        // range === true -> there is a range of dates
         if (!range) {
             tempForecast = forecasts.consolidated_weather[0]
         }
