@@ -7,13 +7,14 @@ const
     search = require('./Search/search'),
     search_inquirer = require('./Search/inquirer'),
     history_inquirer = require('./History/inquirer')
-    inquirer = require('inquirer'), //temp <-- remove later
     Table = require('cli-table2'),
     filename = 'weatherSearchHistory.json',
-    fs = require('fs')
+    fs = require('fs'),
+    utilities = require('./utils/utilities.js'),
+    inquirer = require('inquirer')
 
-// creating variables to store in history feature
-var
+// history global variables
+let
     cliFlag = false,
     mainLoopChoice = '',
     radiusChoice = '',
@@ -36,8 +37,7 @@ var
     }],
     cliStrings = []
 
-
-// menu io loop
+// menu IO loop
 const menu_recur = () => {
     
     console.log('\n') // separate main menu from outputs
@@ -80,7 +80,6 @@ const menu_recur = () => {
                 break;
             }
             case 'history': {
-                //console.log(array)
 
                 if (array.length == 1){
                     console.log( colors.cyan('Search History is empty') );
@@ -128,6 +127,207 @@ const menu_recur = () => {
     })
 }
 
+//----------------Search by Weather and Date Range Starts Here-----------------
+
+const extractProperty = (response, selectedLocation, radiusMarker) => {
+    for (let i = 0; i < response.length; i++) {
+        if (response[i].title === selectedLocation) {
+            if (radiusMarker) {
+                return response[i].latt_long
+            }
+            else {
+                return response[i].woeid
+            }
+        }
+    }
+    // checks if app runs from cli or menu
+    return (cliFlag) ? null : menu_recur()
+}
+
+// gets forecasts of location [range of dates]
+const getForecasts = (location, days, selections) => {
+
+    if ((location.trim() != '') && (location.length != 0)) {
+
+        // gets list of locations from API
+        weather.woeid_by_query(location).then(result => {
+            
+            // user choose a selection of locations
+            utilities.locationFinder(result).then(selectedLocation => {
+                let date = new Date()
+                let dateStr = ''
+                let datesWithForecasts = []
+
+                //no data for searched location
+                if (result.length === 0) {
+                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                    return (cliFlag) ? null : menu_recur()
+                }
+
+                // prints today's forecasts at location
+                if (days.length === 0) {
+                    dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
+                    printForecast(weather.get_weather_by_woeid(extractProperty(result, selectedLocation.location, false)),
+                        selections, dateStr, datesWithForecasts, selectedLocation.location)
+                }
+
+                // prints forecasts for range of dates at location
+                days.forEach(day => {
+                    dateStr = `${day.month + 1}-${day.day}-${day.year}`
+                    printForecast(weather.get_weather_by_woeid_at_date(extractProperty(result, selectedLocation.location, false),
+                        day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, selectedLocation.location, true, days.length)
+                })
+            })
+        })
+    }
+    else {
+        console.log(colors.black.bgYellow('Error. Invalid location.'))
+        return (cliFlag) ? null : menu_recur()
+    }
+}
+
+// handle today weather response
+const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
+    globalLocation = location;
+    dateWeatherStartDate = startDate;
+    dateWeatherEndDate = endDate;
+    dateWeatherRange = range;
+    //cli output                // remove if done
+    //console.log('node cli search "' + globalLocation + '"');           // remove if done
+    cliArray(colors.yellow('node cli search "' + globalLocation + '"'));
+    search_inquirer.getWeatherFilters(cliFlag)
+        .then(filters => {
+            if (filters.conditions.toString() === 'return to menu') {
+                return (cliFlag) ? null : menu_recur()
+            }
+            getForecasts(location, [], filters.conditions)
+        })
+        .catch(err => {
+            console.log(err)
+        })
+}
+
+// handle dateRange weather response
+const dateRangeWeather = (location) => {
+    search_inquirer.startDate_inquirer().then(start => {
+        search_inquirer.endDate_inquirer().then(end => {
+            let startDate = new Date(start.startDate)
+            let endDate = new Date(end.endDate)
+            globalLocation = location;
+            dateRangeWeatherStart = start.startDate;
+            dateRangeWeatherEnd = end.endDate;
+            //cli output
+            //console.log('node cli search "' + globalLocation +'" ' + dateRangeWeatherStart + ' ' + dateRangeWeatherEnd);
+            cliArray(colors.yellow('node cli search "' + globalLocation + '" ' + dateRangeWeatherStart + ' ' + dateRangeWeatherEnd));
+            pushArray();
+            if (startDate.toString() === 'Invalid Date'
+                || endDate.toString() === 'Invalid Date') {
+                console.log(colors.black.bgYellow('Error. Invalid start or end date.'))
+                return (cliFlag) ? null : menu_recur()
+            }
+
+            if (new Date(start.startDate) > new Date(end.endDate)) {
+                console.log(colors.black.bgYellow('Error. Start date later than end date.'))
+                return (cliFlag) ? null : menu_recur()
+            }
+            filterSearch(location, [start.startDate, end.endDate])
+        })
+    })
+}
+
+const printForecast = (response, selections, dateStr, datesWithForecasts, location, range = false, days = 1) => {
+    let tempForecast
+    let output
+
+    response.then(forecasts => {
+        // range === true -> there is a range of dates
+        if (!range) {
+            tempForecast = forecasts.consolidated_weather[0]
+        }
+        else {
+            tempForecast = forecasts[0]
+        }
+        let filteredForecast = search.filterForecast(selections, tempForecast)
+
+        datesWithForecasts.push({
+            date: dateStr,
+            location: location,
+            output: filteredForecast
+        })
+
+        let currentForecastCount = datesWithForecasts.length
+        if (currentForecastCount === days) {
+            if (currentForecastCount > 1) {
+                datesWithForecasts.sort((a, b) => {
+                    let A = new Date(a.date),
+                        B = new Date(b.date)
+
+                    if (A < B) return -1
+                    if (A > B) return 1
+                    return 0
+                })
+            }
+            console.log(search.datesTable(datesWithForecasts).toString())
+            return (cliFlag) ? null : menu_recur()
+        }
+    }).catch(err => {
+        console.log(err)
+    })
+}
+
+// handle today and dateRange command in cli
+const filterSearch = (location, dateRange, cli = false) => {
+    cliFlag = cli
+    let days = search.getDateRange(dateRange)
+    search_inquirer.getWeatherFilters(cliFlag)
+        .then(filters => {
+            let exitName = (cliFlag) ? 'exit' : 'return to menu'
+            if (filters.conditions.toString() === exitName) {
+                return (cliFlag) ? null : menu_recur()
+            }
+            getForecasts(location, days, filters.conditions)
+        })
+}
+
+const print = (result) => {
+    console.log(rangeSearch.table(result).toString())
+    return (cliFlag) ? null : menu_recur()
+}
+
+
+
+//-------------LOCATION + RADIUS STARTS HERE-----------------------
+const surroundingCitiesWeather = (location, cli = false) => {
+    cliFlag = cli
+    globalLocation = location;
+    //cli output
+    //console.log('node cli searchDistance -l ' + globalLocation);
+    cliArray( colors.yellow('node cli searchDistance -l ' + globalLocation) );
+    pushArray();
+    let lattLong = []
+    
+    weather.woeid_by_query(location)
+        .then(result => {
+            utilities.locationFinder(result).then( selectedLocation => {
+                //Validating to make sure that the city entered exists within the MetaWeather API
+                if (result.length === 0) {
+                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                    return (cliFlag) ? null : menu_recur()
+                }
+                else {
+                    lattLong = extractProperty(result, selectedLocation.location, true).split(',')
+                    weather.woeid_by_lattlong(lattLong[0], lattLong[1])
+                        .then(result => {
+                            selectRange(result)
+                        })
+                        .catch(err => console.log(err))
+                }
+            })
+        })
+        .catch(err => console.log(err))
+}
+
+
 const selectRange = (result) => {
     rangeSearch_inquirer.selectRange_inquirer()
         .then((answers) => {
@@ -136,18 +336,9 @@ const selectRange = (result) => {
         })
 }
 
-const searchWeather = (cities, weather) => {
-    let result = rangeSearch.searchWeather(cities, weather)
-    if (result.length === 0) {
-        console.log(colors.black.bgYellow('There are no results for the miles and weather condition specified.'))
-        return (cliFlag) ? null : menu_recur()
-    }
-    else {
-        print(result)
-    }
-}
 
-//used an empty parameter here in order to reuse this function for another feature
+
+//used an empty parameter here in order to use this function with both RADIUS features
 const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
     const citiesInfo = []
     cities.forEach(city => {
@@ -175,97 +366,9 @@ const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
     })
 }
 
-//today and daterange start-------------------------------------------------------------------------------
 
-const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
-    globalLocation = location;
-    dateWeatherStartDate = startDate;
-    dateWeatherEndDate = endDate;
-    dateWeatherRange = range;
-    //cli output
-    //console.log('node cli search "' + globalLocation + '"');
-    cliArray( colors.yellow('node cli search "' + globalLocation + '"') );
-    search_inquirer.getWeatherFilters(cliFlag)
-        .then(filters => {
-            if (filters.conditions.toString() === 'return to menu') {
-                return (cliFlag) ? null : menu_recur()
-            }
-            getForecasts(location, [], filters.conditions)
-        })
-        .catch(err => {
-            console.log(err)
-        })
-}
+//-----------LOCATION + RADIUS + WEATHER STARTS HERE---------------------
 
-const dateRangeWeather = (location) => {
-    search_inquirer.startDate_inquirer().then(start => {
-        search_inquirer.endDate_inquirer().then(end => {
-            let startDate = new Date(start.startDate)
-            let endDate = new Date(end.endDate)
-            globalLocation = location;
-            dateRangeWeatherStart = start.startDate;
-            dateRangeWeatherEnd = end.endDate;
-            //cli output
-            //console.log('node cli search "' + globalLocation +'" ' + dateRangeWeatherStart + ' ' + dateRangeWeatherEnd);
-            cliArray( colors.yellow('node cli search "' + globalLocation + '" ' + dateRangeWeatherStart + ' ' + dateRangeWeatherEnd) );
-            pushArray();
-            if (startDate.toString() === 'Invalid Date'
-                || endDate.toString() === 'Invalid Date') {
-                console.log(colors.black.bgYellow('Error. Invalid start or end date.'))
-                return (cliFlag) ? null : menu_recur()
-            }
-
-            if (new Date(start.startDate) > new Date(end.endDate)) {
-                console.log(colors.black.bgYellow('Error. Start date later than end date.'))
-                return (cliFlag) ? null : menu_recur()
-            }
-            filterSearch(location, [start.startDate, end.endDate])
-        })
-    })
-}
-
-//today and daterange end---------------------------------------------------------------------------------
-
-const surroundingCitiesWeather = (location, cli = false) => {
-    cliFlag = cli
-    globalLocation = location;
-    //cli output
-    //console.log('node cli searchDistance -l ' + globalLocation);
-    cliArray( colors.yellow('node cli searchDistance -l ' + globalLocation) );
-    pushArray();
-    let
-        lattLong = []
-    weather.woeid_by_query(location)
-        .then(result => {
-            //Validating to make sure that the city entered exists within the MetaWeather API
-            if (result.length === 0) {
-                console.log(colors.black.bgYellow(`There are no results for ${location}.`))
-                return (cliFlag) ? null : menu_recur()
-            }
-            else {
-                lattLong = result[0].latt_long.split(',')
-                weather.woeid_by_lattlong(lattLong[0], lattLong[1])
-                    .then(result => {
-                        selectRange(result)
-                    })
-                    .catch(err => console.log(err))
-            }
-        })
-        .catch(err => console.log(err))
-}
-
-//----------------Search by Weather and Range Starts Here-----------------
-
-const selectWeather = (result) => {
-    rangeSearch_inquirer.selectWeather_inquirer()
-        .then((answers) => {
-            rangeSearch_inquirer.selectRange_inquirer()
-                .then((input) => {
-                    let obj = rangeSearch.selectWeather(result, answers, input)
-                    foreCastForCitiesInRange(obj.withinRange, obj.selectedWeather)
-                })
-        })
-}
 
 const searchWeatherWithinRange = (location, cli = false) => {
     cliFlag = cli
@@ -279,118 +382,48 @@ const searchWeatherWithinRange = (location, cli = false) => {
 
     weather.woeid_by_query(location)
         .then(result => {
-            //Validating to make sure that the city entered exists within the MetaWeather API
-            if (result.length === 0) {
-                console.log(colors.black.bgYellow(`There are no results for ${location}.`))
-                return (cliFlag) ? null : menu_recur()
-            }
-            else {
-                lattLong = result[0].latt_long.split(',')
-                weather.woeid_by_lattlong(lattLong[0], lattLong[1])
-                    .then(result => {
-                        selectWeather(result)
-                    })
-                    .catch(err => console.log(err))
-            }
-        })
-        .catch(err => console.log(err))
-}
-
-// gets forecasts of location
-const getForecasts = (location, days, selections) => {
-    if ((location.trim() != '') && (location.length != 0)) {
-        weather.woeid_by_query(location)
-
-            .then(result => {
-                let date = new Date()
-                let dateStr = ''
-                let datesWithForecasts = []
-
-                //no data for searched location
+            utilities.locationFinder(result).then( selectedLocation => {
+                //Validating to make sure that the city entered exists within the MetaWeather API
                 if (result.length === 0) {
                     console.log(colors.black.bgYellow(`There are no results for ${location}.`))
                     return (cliFlag) ? null : menu_recur()
                 }
-
-                //no date range specified
-                if (days.length === 0) {
-                    dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
-                    printForecast(weather.get_weather_by_woeid(result[0].woeid), 
-                        selections, dateStr, datesWithForecasts, result[0].title)
+                else {
+                    lattLong = extractProperty(result, selectedLocation.location, true).split(',')
+                    weather.woeid_by_lattlong(lattLong[0], lattLong[1])
+                        .then(result => {
+                            selectWeather(result)
+                        })
+                        .catch(err => console.log(err))
                 }
-
-                days.forEach(day => {
-                    dateStr = `${day.month + 1}-${day.day}-${day.year}`
-                    printForecast(weather.get_weather_by_woeid_at_date(result[0].woeid,
-                        day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, result[0].title, true, days.length)
-                })
             })
-    }
-    else {
-        console.log(colors.black.bgYellow('Error. Invalid location. '))
+        })
+        .catch(err => console.log(err))
+}
+
+const selectWeather = (result) => {
+    rangeSearch_inquirer.selectWeather_inquirer()
+        .then((answers) => {
+            rangeSearch_inquirer.selectRange_inquirer()
+                .then((input) => {
+                    let obj = rangeSearch.selectWeather(result, answers, input)
+                    foreCastForCitiesInRange(obj.withinRange, obj.selectedWeather)
+                })
+        })
+}
+
+
+
+
+const searchWeather = (cities, weather) => {
+    let result = rangeSearch.searchWeather(cities, weather)
+    if (result.length === 0) {
+        console.log(colors.black.bgYellow('There are no results for the miles and weather condition specified.'))
         return (cliFlag) ? null : menu_recur()
     }
-}
-
-// TODO: print all locations with searched string in Today's
-const printForecast = (response, selections, dateStr, datesWithForecasts, location, range = false, days = 1) => {
-    let tempForecast
-    let output
-
-    response.then(forecasts => {
-        // range == true -> there is a range of dates
-        if (!range) {
-            tempForecast = forecasts.consolidated_weather[0]
-        }
-        else {
-            tempForecast = forecasts[0]
-        }
-        let filteredForecast = search.filterForecast(selections, tempForecast)
-
-        datesWithForecasts.push({
-            date: dateStr,
-            location: location,
-            output: filteredForecast
-        })
-
-        let currentForecastCount = datesWithForecasts.length
-        if(currentForecastCount === days) {
-            if(currentForecastCount > 1) {
-                datesWithForecasts.sort((a, b) => {
-                    let A = new Date(a.date),
-                        B = new Date(b.date)
-    
-                    if (A < B) return -1
-                    if (A > B) return 1
-                    return 0
-                })
-            }
-            console.log(search.datesTable(datesWithForecasts).toString())
-            return (cliFlag) ? null : menu_recur()
-        }
-    }).catch(err => {
-        console.log(err)
-    })
-
-}
-
-// wrapper for search
-const filterSearch = (location, dateRange, cli = false) => {
-    cliFlag = cli
-    let days = search.getDateRange(dateRange)
-    search_inquirer.getWeatherFilters(cliFlag)
-        .then(filters => {
-            let exitName = (cliFlag) ? 'exit' : 'return to menu'
-            if(filters.conditions.toString() === exitName) {
-                return (cliFlag) ? null : menu_recur()
-            }
-            getForecasts(location, days, filters.conditions)
-        })
-}
-
-const print = (result) => {
-    console.log(rangeSearch.table(result).toString())
-    return (cliFlag) ? null : menu_recur()
+    else {
+        print(result)
+    }
 }
 
 //----------------History Starts Here-----------------
