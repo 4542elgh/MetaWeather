@@ -151,33 +151,34 @@ const getForecasts = (location, days, selections) => {
 
         // gets list of locations from API
         weather.woeid_by_query(location).then(result => {
-            
-            // user choose a selection of locations
-            utilities.locationFinder(result).then(selectedLocation => {
-                let date = new Date()
-                let dateStr = ''
-                let datesWithForecasts = []
 
-                //no data for searched location
-                if (result.length === 0) {
-                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
-                    return (cliFlag) ? null : menu_recur()
-                }
+             //no data for searched location
+            if (result.length === 0) {
+                console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                return (cliFlag) ? null : menu_recur()
+            }
+            else {
+                // user choose a selection of locations
+                utilities.locationFinder(result).then(selectedLocation => {
+                    let date = new Date()
+                    let dateStr = ''
+                    let datesWithForecasts = []
 
-                // prints today's forecasts at location
-                if (days.length === 0) {
-                    dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
-                    printForecast(weather.get_weather_by_woeid(extractProperty(result, selectedLocation.location, false)),
-                        selections, dateStr, datesWithForecasts, selectedLocation.location)
-                }
+                    // prints today's forecasts at location
+                    if (days.length === 0) {
+                        dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
+                        printForecast(weather.get_weather_by_woeid(extractProperty(result, selectedLocation.location, false)),
+                            selections, dateStr, datesWithForecasts, selectedLocation.location)
+                    }
 
-                // prints forecasts for range of dates at location
-                days.forEach(day => {
-                    dateStr = `${day.month + 1}-${day.day}-${day.year}`
-                    printForecast(weather.get_weather_by_woeid_at_date(extractProperty(result, selectedLocation.location, false),
-                        day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, selectedLocation.location, true, days.length)
+                    // prints forecasts for range of dates at location
+                    days.forEach(day => {
+                        dateStr = `${day.month + 1}-${day.day}-${day.year}`
+                        printForecast(weather.get_weather_by_woeid_at_date(extractProperty(result, selectedLocation.location, false),
+                            day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, selectedLocation.location, true, days.length)
+                    })
                 })
-            })
+            }
         })
     }
     else {
@@ -308,21 +309,27 @@ const surroundingCitiesWeather = (location, cli = false) => {
     
     weather.woeid_by_query(location)
         .then(result => {
-            utilities.locationFinder(result).then( selectedLocation => {
-                //Validating to make sure that the city entered exists within the MetaWeather API
-                if (result.length === 0) {
-                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
-                    return (cliFlag) ? null : menu_recur()
-                }
-                else {
-                    lattLong = extractProperty(result, selectedLocation.location, true).split(',')
-                    weather.woeid_by_lattlong(lattLong[0], lattLong[1])
-                        .then(result => {
-                            selectRange(result)
-                        })
-                        .catch(err => console.log(err))
-                }
-            })
+            if (result.length === 0) {
+                console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                return (cliFlag) ? null : menu_recur()
+            }
+            else {
+                utilities.locationFinder(result).then( selectedLocation => {
+                    //Validating to make sure that the city entered exists within the MetaWeather API
+                    if (result.length === 0) {
+                        console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                        return (cliFlag) ? null : menu_recur()
+                    }
+                    else {
+                        lattLong = extractProperty(result, selectedLocation.location, true).split(',')
+                        weather.woeid_by_lattlong(lattLong[0], lattLong[1])
+                            .then(result => {
+                                selectRange(result)
+                            })
+                            .catch(err => console.log(err))
+                    }
+                })
+            }
         })
         .catch(err => console.log(err))
 }
@@ -382,21 +389,27 @@ const searchWeatherWithinRange = (location, cli = false) => {
 
     weather.woeid_by_query(location)
         .then(result => {
-            utilities.locationFinder(result).then( selectedLocation => {
-                //Validating to make sure that the city entered exists within the MetaWeather API
-                if (result.length === 0) {
-                    console.log(colors.black.bgYellow(`There are no results for ${location}.`))
-                    return (cliFlag) ? null : menu_recur()
-                }
-                else {
-                    lattLong = extractProperty(result, selectedLocation.location, true).split(',')
-                    weather.woeid_by_lattlong(lattLong[0], lattLong[1])
-                        .then(result => {
-                            selectWeather(result)
-                        })
-                        .catch(err => console.log(err))
-                }
-            })
+            if (result.length === 0) {
+                console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                return (cliFlag) ? null : menu_recur()
+            }
+            else {
+                utilities.locationFinder(result).then( selectedLocation => {
+                    //Validating to make sure that the city entered exists within the MetaWeather API
+                    if (result.length === 0) {
+                        console.log(colors.black.bgYellow(`There are no results for ${location}.`))
+                        return (cliFlag) ? null : menu_recur()
+                    }
+                    else {
+                        lattLong = extractProperty(result, selectedLocation.location, true).split(',')
+                        weather.woeid_by_lattlong(lattLong[0], lattLong[1])
+                            .then(result => {
+                                selectWeather(result)
+                            })
+                            .catch(err => console.log(err))
+                    }
+                })
+            }
         })
         .catch(err => console.log(err))
 }
