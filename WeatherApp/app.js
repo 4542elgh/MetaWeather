@@ -39,7 +39,7 @@ let
 
 // menu IO loop
 const menu_recur = () => {
-    
+
     console.log('\n') // separate main menu from outputs
     mainLoop.menu().then(result => {
         switch (result.option) {
@@ -124,7 +124,6 @@ const menu_recur = () => {
 
 //----------------Search by Weather and Date Range Starts Here-----------------
 
-// 
 const extractProperty = (response, selectedLocation, radiusMarker) => {
     for (let i = 0; i < response.length; i++) {
         if (response[i].title === selectedLocation) {
@@ -160,19 +159,22 @@ const getForecasts = (location, days, filterSelections) => {
                     let dateStr = ''
                     let datesWithForecasts = []
 
+                    // process selected location
+                    let woeid = extractProperty(result, selectedLocation.location, false)
+
                     // prints today's forecasts at location
                     if (days.length === 0) {
                         dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
-                        let woeid = extractProperty(result, selectedLocation.location, false)
+                        
                         printForecast(weather.get_weather_by_woeid(woeid), filterSelections, selectedLocation.location, dateStr, datesWithForecasts)
                     }
-
-                    // prints forecasts for range of dates at location
-                    days.forEach(day => {
-                        dateStr = `${day.month + 1}-${day.day}-${day.year}`
-                        printForecast(weather.get_weather_by_woeid_at_date(extractProperty(result, selectedLocation.location, false),
-                            day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, selectedLocation.location, true, days.length)
-                    })
+                    else {
+                        // prints forecasts for range of dates at location
+                        days.forEach(day => {
+                            dateStr = `${day.month + 1}-${day.day}-${day.year}`
+                            printForecast(weather.get_weather_by_woeid_at_date(woeid, day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, selectedLocation.location, true, days.length)
+                        })
+                    }
                 })
             }
         })
@@ -252,7 +254,6 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, locati
             location: location,
             output: filteredForecast
         })
-
         let currentForecastCount = datesWithForecasts.length
         if (currentForecastCount === days) {
             if (currentForecastCount > 1) {

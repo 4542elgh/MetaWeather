@@ -26,17 +26,8 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
         }
     })
     .command({
-        command:'dateWeather <location>',
-        desc: 'return weather for specific location',
-        alias: 'dw',
-        handler: (argv) => {
-            app.dateWeather(argv.location,0)
-        }
-    })
-    .command({
         command:'searchDistance <location>',
         desc: 'return surrounding cities and forecasts within the radius from the location',
-        alias: 'sd',
         handler: (argv) => {
             app.surroundingCitiesWeather(argv.location, true)
         }
@@ -44,7 +35,6 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
     .command({
         command:'searchWeatherAndDistance <location>',
         desc: 'return surrounding cities that have the weather conditions and are within the radius from the location',
-        alias: 'wd',
         handler: (argv) => {
             app.searchWeatherWithinRange(argv.location, true)
         }
@@ -61,7 +51,6 @@ const flags = yargs.usage('$0: Usage <cmd> [options]')
                         validDates = true
                     }
                 }
-
             if(validDates || argv.dateRange.length === 0) { 
                 app.filterSearch(argv.location, argv.dateRange, true)
             }
