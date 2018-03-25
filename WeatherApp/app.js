@@ -166,7 +166,7 @@ const getForecasts = (location, days, filterSelections) => {
                     if (days.length === 0) {
                         dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
                         
-                        printForecast(weather.get_weather_by_woeid(woeid), filterSelections, selectedLocation.location, dateStr, datesWithForecasts)
+                        printForecast(weather.get_weather_by_woeid(woeid), filterSelections, dateStr, datesWithForecasts, selectedLocation.location)
                     }
                     else {
                         // prints forecasts for range of dates at location
