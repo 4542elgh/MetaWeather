@@ -415,7 +415,7 @@ const selectWeather = (result) => {
         .then((answers) => {
             rangeSearch_inquirer.selectRange_inquirer()
                 .then((input) => {
-                    let obj = rangeSearch.selectWeather(result, answers, input)
+                    let obj = rangeSearch.checkRadius(result, answers, input)
                     foreCastForCitiesInRange(obj.withinRange, obj.selectedWeather)
                 })
         })
