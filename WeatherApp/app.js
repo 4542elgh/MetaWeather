@@ -507,7 +507,22 @@ const pushArray = () => {
     }
     for (z = 0; z < array.length; z++) {
         if (mainLoopChoice == array[z].mainLoopChoice && globalLocation == array[z].globalLocation){
-            return
+            if(array[z].mainLoopChoice == 'radius' && array[z].radiusChoice == radiusChoice){
+                return
+            }
+            else{
+                array.push({
+                    mainLoopChoice: mainLoopChoice,
+                    radiusChoice: radiusChoice,
+                    globalLocation: globalLocation,
+                    dateWeatherStartDate: dateWeatherStartDate,
+                    dateWeatherEndDate: dateWeatherEndDate,
+                    dateWeatherRange: dateWeatherRange,
+                    dateRangeWeatherStart: dateRangeWeatherStart,
+                    dateRangeWeatherEnd: dateRangeWeatherEnd
+                })
+                return
+            }
         }
      }
     array.push({
