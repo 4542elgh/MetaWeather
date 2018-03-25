@@ -378,7 +378,7 @@ const searchWeatherWithinRange = (location, cli = false) => {
     globalLocation = location;
     //cli output
     //console.log('node cli searchWeatherAndDistance -l '+ globalLocation);
-    cliArray( colors.yellow('node cli searchWeatherAndDistance -l ' + globalLocation) );
+    cliArray( colors.yellow('node cli searchWeatherAndDistance ' + globalLocation) );
     pushArray();
     let
         lattLong = []
