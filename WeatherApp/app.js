@@ -172,7 +172,7 @@ const getForecasts = (location, days, filterSelections) => {
                         // prints forecasts for range of dates at location
                         days.forEach(day => {
                             dateStr = `${day.month + 1}-${day.day}-${day.year}`
-                            printForecast(weather.get_weather_by_woeid_at_date(woeid, day.year, day.month + 1, day.day), selections, dateStr, datesWithForecasts, selectedLocation.location, true, days.length)
+                            printForecast(weather.get_weather_by_woeid_at_date(woeid, day.year, day.month + 1, day.day), filterSelections, dateStr, datesWithForecasts, selectedLocation.location, true, days.length)
                         })
                     }
                 })
@@ -235,7 +235,7 @@ const dateRangeWeather = (location) => {
     })
 }
 
-const printForecast = (response, selections, dateStr, datesWithForecasts, location, range = false, days = 1) => {
+const printForecast = (response, filterSelections, dateStr, datesWithForecasts, location, range = false, days = 1) => {
     let tempForecast
     let output
 
@@ -247,7 +247,7 @@ const printForecast = (response, selections, dateStr, datesWithForecasts, locati
         else {
             tempForecast = forecasts[0]
         }
-        let filteredForecast = search.filterForecast(selections, tempForecast)
+        let filteredForecast = search.filterForecast(filterSelections, tempForecast)
 
         datesWithForecasts.push({
             date: dateStr,
