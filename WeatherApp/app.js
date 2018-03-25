@@ -344,25 +344,28 @@ const selectRange = (result) => {
 
 
 //used an empty parameter here in order to use this function with both RADIUS features
-const foreCastForCitiesInRange = (cities, weatherToSearch = []) => {
+const foreCastForCitiesInRange = (citiesWithinRadius, weatherToSearch = []) => {
     const citiesInfo = []
-    cities.forEach(city => {
-        //getting the weather info for each city in range using the WOEID(Where on Earth ID)
+    citiesWithinRadius.forEach(city => {
+        /*Here we make another API call for each citie within radius using
+         WOEID(Where on earth ID) for each one which returns the weather condition */
         weather.get_weather_by_woeid(city.woeid)
-            //this returns the 5 day forecast for all the cities not in the particular order given
-            //but as soon as the API has a response for that city.
-            //Also we only want the forecasts of the day the query is made so the other days are of no cosequence
-            .then(result => {
+           .then(result => {
+               /* We then parse out the data we are interested since some of it is not relevant
+               and save it on citiesInfo*/
                 citiesInfo.push(
                     rangeSearch.citiesInfo(result, city)
                 )
                 //reorganize the list of cities by distance in ascending order,
                 //since our response might shuffle them.
-                if (cities.length === citiesInfo.length) {
+                if (citiesWithinRadius.length === citiesInfo.length) {
                     if (weatherToSearch.length == 0) {
                         print(rangeSearch.sortResults(citiesInfo))
                     }
                     else {
+                        /*Here since weatherToSearch.length !== 0 we compare using
+                         searchWeather to check if the cities within radius have the 
+                        weather specified from the user */
                         searchWeather(rangeSearch.sortResults(citiesInfo), weatherToSearch)
                     }
                 }
@@ -417,7 +420,7 @@ const selectWeather = (result) => {
         .then((answers) => {
             rangeSearch_inquirer.selectRange_inquirer()
                 .then((input) => {
-                    let obj = rangeSearch.selectWeather(result, answers, input)
+                    let obj = rangeSearch.checkRadius(result, answers, input)
                     foreCastForCitiesInRange(obj.withinRange, obj.selectedWeather)
                 })
         })
@@ -427,7 +430,9 @@ const selectWeather = (result) => {
 
 
 const searchWeather = (cities, weather) => {
-    let result = rangeSearch.searchWeather(cities, weather)
+    //here we compare the weather specified from user using checkWeather
+    //if there are no results we display an error and return to the menu
+    let result = rangeSearch.checkWeather(cities, weather)
     if (result.length === 0) {
         console.log(colors.black.bgYellow('There are no results for the miles and weather condition specified.'))
         return (cliFlag) ? null : menu_recur()
@@ -504,7 +509,22 @@ const pushArray = () => {
     }
     for (z = 0; z < array.length; z++) {
         if (mainLoopChoice == array[z].mainLoopChoice && globalLocation == array[z].globalLocation){
-            return
+            if(array[z].mainLoopChoice == 'radius' && array[z].radiusChoice == radiusChoice){
+                return
+            }
+            else{
+                array.push({
+                    mainLoopChoice: mainLoopChoice,
+                    radiusChoice: radiusChoice,
+                    globalLocation: globalLocation,
+                    dateWeatherStartDate: dateWeatherStartDate,
+                    dateWeatherEndDate: dateWeatherEndDate,
+                    dateWeatherRange: dateWeatherRange,
+                    dateRangeWeatherStart: dateRangeWeatherStart,
+                    dateRangeWeatherEnd: dateRangeWeatherEnd
+                })
+                return
+            }
         }
      }
     array.push({

@@ -40,10 +40,11 @@ const citiesInfo = (result,city)=>{
     }
 }
 
-const searchWeather = (cities,weather)=>{
+const checkWeather = (cities,weather)=>{
     let
         result = []
-
+    //loop through the cities within radius and check if that
+    //city has any of of the weather conditions specified by the user
     cities.forEach(city=>{
         weather.forEach((item,index)=>{
             if (city.conditions === weather[index]){
@@ -55,23 +56,22 @@ const searchWeather = (cities,weather)=>{
     return result;
 }
 
-const selectWeather = (result,answers, input)=>{
+/*Here result is the surrounding cities given by the API
+answers.miles is the selected weather condition by the user and 
+input is the selected radius by the user */
+const checkRadius = (result,answers, input)=>{
     const
         range = utilities.milesToMeters(parseInt(input.miles)),
-        withinRange = [],
-        selectedWeather =[]
-
-    answers.miles.forEach(weather =>{
-        selectedWeather.push(weather)
-    })
+        withinRange = []
+    
 
     result.forEach(city => {
         //the selected range will be used to get all the forecast of the cities
         if (city.distance <= range)
             withinRange.push(city)
     })
-
-    return {withinRange:withinRange,selectedWeather:selectedWeather}
+    //both of these are now returned after getting the cities withing radius
+    return {withinRange:withinRange,selectedWeather:answers.miles}
 }
 
 const selectRange = (result,answers)=>{
@@ -107,5 +107,5 @@ const table = (result)=>{
 }
 
 module.exports = {
-    sortResults, table, citiesInfo, searchWeather, selectWeather, selectRange
+    sortResults, table, citiesInfo, checkWeather, checkRadius, selectRange
 }
