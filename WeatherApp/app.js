@@ -82,7 +82,6 @@ const menu_recur = () => {
             case 'history': {
 
                 if (array.length == 1){
-                    console.log( colors.cyan('Search History is empty') );
                     return menu_recur()
                 }
 
@@ -93,21 +92,17 @@ const menu_recur = () => {
 
                     let param = result.option.split(' ==> ');
                     if (param[0] == 'today') {
-                        console.log( colors.yellow(`node cli dateWeather -l ${param[1]}`) )
                         dateWeather(param[1])
                     }
                     else if (param[0] == 'radius') {
                         if (param[1] == 'location + weather condition + radius') {
-                            console.log(`node cli searchWeatherAndDistance ${param[2]}`)
                             searchWeatherWithinRange(param[2]);
                         }
                         else {
-                            console.log(`node cli searchDistance ${param[2]}`)
                             surroundingCitiesWeather(param[2]);
                         }
                     }
                     else if (param[0] == 'date range') {
-                        console.log(`node cli filterSearch ${param[1]} [${param[2]},${param[3]}]`)
                         filterSearch(param[1], [param[2], param[3]])
                     }
                 })
