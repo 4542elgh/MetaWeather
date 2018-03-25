@@ -43,7 +43,8 @@ const citiesInfo = (result,city)=>{
 const checkWeather = (cities,weather)=>{
     let
         result = []
-
+    //loop through the cities within radius and check if that
+    //city has any of of the weather conditions specified by the user
     cities.forEach(city=>{
         weather.forEach((item,index)=>{
             if (city.conditions === weather[index]){
