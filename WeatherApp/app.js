@@ -124,6 +124,7 @@ const menu_recur = () => {
 
 //----------------Search by Weather and Date Range Starts Here-----------------
 
+// 
 const extractProperty = (response, selectedLocation, radiusMarker) => {
     for (let i = 0; i < response.length; i++) {
         if (response[i].title === selectedLocation) {
@@ -140,11 +141,11 @@ const extractProperty = (response, selectedLocation, radiusMarker) => {
 }
 
 // gets forecasts of location [range of dates]
-const getForecasts = (location, days, selections) => {
+const getForecasts = (location, days, filterSelections) => {
 
     if ((location.trim() != '') && (location.length != 0)) {
 
-        // gets list of locations from API using WOEID
+        // returns the locations with the searched string
         weather.woeid_by_query(location).then(result => {
 
              //no data for searched location
@@ -153,7 +154,7 @@ const getForecasts = (location, days, selections) => {
                 return (cliFlag) ? null : menu_recur()
             }
             else {
-                // user choose a selection of locations
+                // user choose the locations from inquirer
                 utilities.locationFinder(result).then(selectedLocation => {
                     let date = new Date()
                     let dateStr = ''
@@ -162,8 +163,8 @@ const getForecasts = (location, days, selections) => {
                     // prints today's forecasts at location
                     if (days.length === 0) {
                         dateStr = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
-                        printForecast(weather.get_weather_by_woeid(extractProperty(result, selectedLocation.location, false)),
-                            selections, dateStr, datesWithForecasts, selectedLocation.location)
+                        let woeid = extractProperty(result, selectedLocation.location, false)
+                        printForecast(weather.get_weather_by_woeid(woeid), filterSelections, selectedLocation.location, dateStr, datesWithForecasts)
                     }
 
                     // prints forecasts for range of dates at location

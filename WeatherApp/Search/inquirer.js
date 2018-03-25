@@ -1,7 +1,31 @@
 const inquirer = require('inquirer'),
     utilities = require('../utils/utilities')
 
-const startDate_inquirer = () => {
+const getWeatherFilters = (cliFlag) => {
+    let conditions = ['forecast', 'temperature', 'air', 'wind']
+
+    //if called from the cli: exit, otherwise return to menu
+    let exitName = (cliFlag) ? 'exit' : 'return to menu'
+    conditions.push(exitName)
+
+    return inquirer.prompt([{
+        type: 'checkbox',
+        message: 'Select the conditions to display:\n',
+        name: 'conditions',
+        choices: conditions,
+        validate: (filters) => {
+            if (filters.length > 1 && filters.indexOf(exitName) > -1) {
+                return 'Only select exit to return to main menu'
+            }
+            if (filters.length != 0) {
+                return true
+            }
+            return 'Please make a selection.'
+        }
+    }])
+}
+
+    const startDate_inquirer = () => {
     return inquirer.prompt([{
         type: 'input',
         message: 'Enter the start date (between 1/1/14 and today):',
@@ -35,30 +59,6 @@ const endDate_inquirer = () => {
             else {
                 return true
             }
-        }
-    }])
-}
-
-const getWeatherFilters = (cliFlag) => {    
-    let conditions = ['forecast', 'temperature', 'air', 'wind']
-
-    //if called from the cli: exit, otherwise return to menu
-    let exitName = (cliFlag) ? 'exit' : 'return to menu'
-    conditions.push(exitName)
-
-    return inquirer.prompt([{
-        type: 'checkbox',
-        message: 'Select the conditions to display:\n',
-        name: 'conditions',
-        choices: conditions,
-        validate: (filters) => {
-            if (filters.length > 1 && filters.indexOf(exitName) > -1) {
-                return 'Only select exit to return to main menu'
-            }
-            if (filters.length != 0) {
-                return true
-            }
-            return 'Please make a selection.'
         }
     }])
 }
