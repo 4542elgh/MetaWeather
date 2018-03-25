@@ -299,7 +299,7 @@ const surroundingCitiesWeather = (location, cli = false) => {
     globalLocation = location;
     //cli output
     //console.log('node cli searchDistance -l ' + globalLocation);
-    cliArray( colors.yellow('node cli searchDistance -l ' + globalLocation) );
+    cliArray( colors.yellow('node cli searchDistance ' + globalLocation) );
     pushArray();
     let lattLong = []
     
