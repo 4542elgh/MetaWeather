@@ -1,6 +1,6 @@
 const inquirer = require('inquirer')
 
-// response = list of locations from API
+
 const locationFinder = (response) => {
     let availableCities = []
 

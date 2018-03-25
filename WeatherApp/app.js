@@ -149,7 +149,7 @@ const getForecasts = (location, days, selections) => {
 
     if ((location.trim() != '') && (location.length != 0)) {
 
-        // gets list of locations from API
+        // gets list of locations from API using WOEID
         weather.woeid_by_query(location).then(result => {
             
             // user choose a selection of locations
@@ -186,7 +186,7 @@ const getForecasts = (location, days, selections) => {
     }
 }
 
-// handle today weather response
+
 const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
     globalLocation = location;
     dateWeatherStartDate = startDate;
@@ -195,6 +195,7 @@ const dateWeather = (location, startDate = '', endDate = '', range = 0) => {
     //cli output                // remove if done
     //console.log('node cli search "' + globalLocation + '"');           // remove if done
     cliArray(colors.yellow('node cli search "' + globalLocation + '"'));
+
     search_inquirer.getWeatherFilters(cliFlag)
         .then(filters => {
             if (filters.conditions.toString() === 'return to menu') {
