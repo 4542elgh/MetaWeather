@@ -40,7 +40,7 @@ const citiesInfo = (result,city)=>{
     }
 }
 
-const searchWeather = (cities,weather)=>{
+const checkWeather = (cities,weather)=>{
     let
         result = []
 
@@ -106,5 +106,5 @@ const table = (result)=>{
 }
 
 module.exports = {
-    sortResults, table, citiesInfo, searchWeather, checkRadius, selectRange
+    sortResults, table, citiesInfo, checkWeather, checkRadius, selectRange
 }

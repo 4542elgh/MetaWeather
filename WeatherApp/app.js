@@ -361,8 +361,8 @@ const foreCastForCitiesInRange = (citiesWithinRadius, weatherToSearch = []) => {
                         print(rangeSearch.sortResults(citiesInfo))
                     }
                     else {
-                        /*Here since weatherToSearch.length !== 0 we compare the 
-                        we call searchWether to check if the cities within radius have the 
+                        /*Here since weatherToSearch.length !== 0 we compare using
+                         searchWeather to check if the cities within radius have the 
                         weather specified from the user */
                         searchWeather(rangeSearch.sortResults(citiesInfo), weatherToSearch)
                     }
@@ -428,7 +428,9 @@ const selectWeather = (result) => {
 
 
 const searchWeather = (cities, weather) => {
-    let result = rangeSearch.searchWeather(cities, weather)
+    //here we compare the weather specified from user using checkWeather
+    //if there are no results we display an error and return to the menu
+    let result = rangeSearch.checkWeather(cities, weather)
     if (result.length === 0) {
         console.log(colors.black.bgYellow('There are no results for the miles and weather condition specified.'))
         return (cliFlag) ? null : menu_recur()
