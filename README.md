@@ -25,12 +25,16 @@ Based on MetaWeather api: [https://www.metaweather.com/api/](https://www.metawea
    - return all location with its forecasts within the given radius and satify weather condition(s)
 
 ### Other Attributes
-* provide a table view of the results
-* provide an IO-Gui experience for users
-   - users can select the searches and history
-* display history
-   - keep track of users' commands
-   - allow users to select which commands to execute from the history
-   - return the most recent five searches
-* provide help menu in CLI
-   - return a help menu of commands and its descriptions
+
+* table view of the results
+* cli search by location
+    - Return today's weather conditions with filters
+* cli history
+    - Return the most recent five searches
+    - Allow users to select which location to view from the history
+* date range of forecasts by location
+    - Given these dates, return the forecasts of this location
+* cli help
+    - Display a list of the commands with its descriptions
+* cli IO loop
+    - Exit IO loop by selection
