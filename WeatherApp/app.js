@@ -523,6 +523,11 @@ const pushArray = () => {
 }
 
 const cliArray = (string) => {
+    for (a = 0; a < cliStrings.length; a++) {
+        if (string == cliStrings[a]){
+            return
+        }
+     }
     cliStrings.push(string);
 }
 
