@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Evan (MingYang) Liu, Hue Ngo, Russell Carter, Walter Carbajal, Raymond Chen",
   "license": "ISC",
   "dependencies": {
     "cli-table2": "^0.2.0",
