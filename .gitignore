@@ -1,6 +1,4 @@
-*
-
-!*.json
-!*.js
-!README.md
-!.gitignore
+node_modules
+vueapp/node_modules
+vueapp/..editorconfig
+.idea
