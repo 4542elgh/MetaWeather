@@ -1,7 +1,7 @@
 {
   "name": "midterm",
   "version": "1.0.0",
-  "description": "",
+  "description": "metaweather api application with cli and io loop implementation",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
