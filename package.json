@@ -11,7 +11,7 @@
     "type": "git",
     "url": "https://github.com/rbcarter/cs4220_midterm.git"
   },
-  "license": "AGPL-3.0-only",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "cli-table2": "^0.2.0",
     "colors": "^1.2.1",
