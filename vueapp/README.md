@@ -30,3 +30,6 @@ For a detailed explanation on how things work, check out the [guide](http://vuej
 https://bootstrap-vue.js.org/docs/
 #### Components tab have vue tag which utilize bootstrap-vue module
 
+### Slideout.js
+https://slideout.js.org/
+#### Javascript sidebar animation, server renderer
