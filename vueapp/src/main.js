@@ -4,11 +4,9 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import BootstrapVue from 'bootstrap-vue'
-import axios from 'axios'
-import cors from 'cors'
 
 Vue.config.productionTip = false
-Vue.use(BootstrapVue,axios,cors);
+Vue.use(BootstrapVue);
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'

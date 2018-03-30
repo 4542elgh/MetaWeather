@@ -31,7 +31,6 @@
 <script>
   import Slideout from 'vue-slideout'
   import API from '../../../MetaWeatherAPI/index'
-  import axios from 'axios'
   export default {
     name: 'app',
     components: {
@@ -43,10 +42,6 @@
       }
     },
     methods: {
-      // open: function () {
-      //   console.log('slideoutOpen')
-      // }
-
       fetch_data : function(){
         API.woeid_by_query('Los Angeles').then(result=>{
           console.log(result)
